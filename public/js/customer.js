@@ -23,6 +23,7 @@ var vm = new Vue({
     socket.on('orderId', function (orderId) {
       this.orderId = orderId;
     }.bind(this));
+      
     socket.on('taxiAdded', function (taxi) {
       this.taxiMarkers[taxi.taxiId] = this.putTaxiMarker(taxi);
     }.bind(this));
@@ -53,7 +54,7 @@ var vm = new Vue({
   mounted: function () {
     // set up the map
     this.map = L.map('my-map').setView([59.8415,17.648], 13);
-
+    this.map.removeControl(this.map.zoomControl);
     // create the tile layer with correct attribution
     var osmUrl='http://{s}.tile.osm.org/{z}/{x}/{y}.png';
     var osmAttrib='Map data © <a href="http://openstreetmap.org">OpenStreetMap</a> contributors';
@@ -61,22 +62,67 @@ var vm = new Vue({
         attribution: osmAttrib,
         maxZoom: 18
     }).addTo(this.map);
-    this.map.on('click', this.handleClick);
+    this.map.on('move', this.handleMove);
+    this.fromMarker = L.marker(this.map.getCenter(), {icon: this.fromIcon}).addTo(this.map);
 
-    var searchDestControl = L.esri.Geocoding.geosearch({allowMultipleResults: false, zoomToResult: false, placeholder: "Destination"}).addTo(this.map);
-    var searchFromControl = L.esri.Geocoding.geosearch({allowMultipleResults: false, zoomToResult: false, placeholder: "From"});
-    // listen for the results event and add the result to the map
+    var orderControl = L.Control.extend({
+      options: {
+        position: 'topright' 
+      },
+
+      onAdd: function (map) {
+          var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom orderButton'); 
+          container.style.backgroundColor = 'white';
+
+          return container;
+      }
+    });
+      
+    var orderButton = new orderControl();
+    this.map.addControl(orderButton); 
+    orderButton.getContainer().onclick = this.orderTaxi;
+      
+    var searchDestControl = L.esri.Geocoding.geosearch({
+            allowMultipleResults: false, 
+            zoomToResult: false, 
+            placeholder: "Where do you want to go?",
+            expanded: true,
+            collapseAfterResult: false,
+            position: 'topright'
+        }
+    ).addTo(this.map);
+      
+    var mapHalfHeight = this.map.getSize().y / 2;
+    var mapHalfWidth = this.map.getSize().x / 2;
+    var container = searchDestControl.getContainer();
+    var containerHalfHeight = parseInt(container.offsetHeight / 2);
+    var containerHalfWidth = parseInt(container.offsetWidth / 2);
+      
+    var containerTop = 0 - containerHalfHeight + 'px';
+
+    container.style.position = 'absolute';
+    container.style.top = "50px";
+    container.style.right = mapHalfWidth - containerHalfWidth + 'px';
+    
+    var orderButtonWidth = mapHalfWidth / 2;
+    orderButton.getContainer().style.width = orderButtonWidth + 'px';
+    orderButton.getContainer().style.height = mapHalfHeight / 10 + 'px';  
+    orderButton.getContainer().style.right = mapHalfWidth - (orderButtonWidth / 2) + 'px';
+    orderButton.getContainer().style.top = 1.7 * mapHalfHeight + "px"; 
+    orderButton.getContainer().innerHTML += "Order taxi";
+      
     searchDestControl.on("results", function(data) {
-        this.destMarker = L.marker(data.latlng, {draggable: true}).addTo(this.map);
-        this.destMarker.on("drag", this.moveMarker);
-        searchFromControl.addTo(this.map);
-    }.bind(this));
-
-    // listen for the results event and add the result to the map
-    searchFromControl.on("results", function(data) {
-        this.fromMarker = L.marker(data.latlng, {icon: this.fromIcon, draggable: true}).addTo(this.map);
-        this.fromMarker.on("drag", this.moveMarker);
-        this.connectMarkers = L.polyline([this.fromMarker.getLatLng(), this.destMarker.getLatLng()], {color: 'blue'}).addTo(this.map);
+        if (this.destMarker == null) {
+            this.destMarker = L.marker(data.latlng, {draggable: true}).addTo(this.map);
+            this.destMarker.on("drag", this.moveMarker);
+            if (this.fromMarker != null) {
+                this.connectMarkers = L.polyline([this.fromMarker.getLatLng(), this.destMarker.getLatLng()], {color: 'blue'}).addTo(this.map);   
+            }
+        } else {
+            this.destMarker.setLatLng(data.latlng);
+            this.moveMarker();
+        }
+        
     }.bind(this));
   },
   methods: {
@@ -92,25 +138,13 @@ var vm = new Vue({
                                        orderItems: { passengers: 1, bags: 1, animals: "doge" }
                                      });
     },
-    handleClick: function (event) {
-      // first click sets destination
-      if (this.destMarker === null) {
-        this.destMarker = L.marker([event.latlng.lat, event.latlng.lng], {draggable: true}).addTo(this.map);
-        this.destMarker.on("drag", this.moveMarker);
-      }
-      // second click sets pickup location
-      else if (this.fromMarker === null) {
-        this.fromMarker = L.marker(event.latlng, {icon: this.fromIcon, draggable: true}).addTo(this.map);
-        this.fromMarker.on("drag", this.moveMarker);
-        this.connectMarkers = L.polyline([this.fromMarker.getLatLng(), this.destMarker.getLatLng()], {color: 'blue'}).addTo(this.map);
-      }
+    handleMove: function (event) {
+        this.fromMarker.setLatLng(this.map.getCenter());  
+        this.moveMarker();
     },
     moveMarker: function (event) {
-      this.connectMarkers.setLatLngs([this.fromMarker.getLatLng(), this.destMarker.getLatLng()], {color: 'blue'});
-      /*socket.emit("moveMarker", { orderId: event.target.orderId,
-                                latLong: [event.target.getLatLng().lat, event.target.getLatLng().lng]
-                                });
-                                */
-    }
+        if (this.fromMarker == null || this.destMarker == null) return;
+        this.connectMarkers.setLatLngs([this.fromMarker.getLatLng(), this.destMarker.getLatLng()], {color: 'blue'});
+    }   
   }
 });

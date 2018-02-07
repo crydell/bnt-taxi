@@ -1,16 +1,25 @@
-body {
+html {
+    font-family: 'Arial', sans-serif;
 	margin: 0;
 	padding: 0;
 }
 
 #my-map {
-	width: 90%;
-	height: 50vh;
-	border: 1px solid rgba(0,0,0,0.4);
-	box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
-	margin: 1em auto;
+	position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
 }
 
 .popup-list {
 	padding-left: 0;
+}
+
+.orderButton {
+    text-align: center;
+    margin: auto;
+
+    font-family: 'Maven Pro';
+    font-size: 16px;
 }

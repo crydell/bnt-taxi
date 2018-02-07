@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TAXI CUSTOMER</title>
+  <link rel="stylesheet" href="leaflet/leaflet.css">
+  <link rel="stylesheet" href="/esri-leaflet-geocoder/esri-leaflet-geocoder.css">
+  <link rel="stylesheet" href="css/taxi.css">
+  <script src="/vue/vue.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/leaflet/leaflet.js"></script>
+  <script src="/esri-leaflet/esri-leaflet.js"></script> 
+  <script src="/esri-leaflet-geocoder/esri-leaflet-geocoder.js"></script> 
+  <script src="js/customer.js" defer></script>
+</head>
+<body>
+  <h1>
+    TAXI CUSTOMER 
+  </h1>
+  <p>Select destination first, then your location</p>
+  <div id="page">
+    <div id="my-map"></div>
+    <button v-on:click="orderTaxi">ORDER TAXI</button>
+    Your order number is {{ orderId }}
+  </div>
+</body>
+</html>

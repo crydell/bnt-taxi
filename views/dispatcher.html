@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TAXI DISPATCHER</title>
+  <link rel="stylesheet" href="leaflet/leaflet.css">
+  <link rel="stylesheet" href="css/taxi.css">
+  <script src="/vue/vue.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/leaflet/leaflet.js"></script>
+  <script src="js/dispatcher.js" defer></script>
+</head>
+<body>
+  <h1>
+    TAXI DISPATCHER
+  </h1>
+  <div id="page">
+    <div id="my-map"></div>
+    <h1>Orders</h1>
+    <ul>
+      <li v-for="order in orders">
+        # {{ order.orderId}} From: {{ order.fromLatLong[0].toFixed(3) }}, {{ order.fromLatLong[1].toFixed(3) }} Destination: {{ order.destLatLong[0].toFixed(3) }}, {{ order.destLatLong[1].toFixed(3) }}
+        <ul>
+          <li v-for="(item, key) in order.orderItems">
+            {{ key + ": " + item }}
+          </li>
+        </ul>
+        <select v-on:change="assignTaxi(order)" v-model="order.taxiId">
+          <option disabled value="">Assign a taxi</option>
+          <option v-for="taxi in taxis" :value="taxi.taxiId"># {{ taxi.taxiId}} Pos: {{ taxi.latLong[0].toFixed(3) }}, {{ taxi.latLong[1].toFixed(3) }} </option>
+        </select> {{ order.taxiIdConfirmed }}
+      </li>
+    </ul>
+  </div>
+</body>
+</html>

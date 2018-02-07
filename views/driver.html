@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>TAXI DRIVER</title>
+  <link rel="stylesheet" href="leaflet/leaflet.css">
+  <link rel="stylesheet" href="css/taxi.css">
+  <script src="/vue/vue.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/leaflet/leaflet.js"></script>
+  <script src="js/driver.js" defer></script>
+</head>
+<body>
+  <div id="page">
+  	<h1>
+	    TAXI DRIVER # {{ taxiId }}
+	  </h1>
+    <div id="my-map"></div>
+    <ul>
+      <div v-for="order in orders" v-if="order.taxiId == taxiId">
+        # {{ order.orderId}} From: {{ order.fromLatLong[0].toFixed(3) }}, {{ order.fromLatLong[1].toFixed(3) }} Destination: {{ order.destLatLong[0].toFixed(3) }}, {{ order.destLatLong[1].toFixed(3) }}
+        <ul>
+          <li v-for="item in order.orderItems">
+            {{ item }}
+          </li>
+        </ul>
+        <button v-on:click="acceptOrder(order)">ACCEPT</button><button v-on:click="finishOrder(order.orderId)">FINISH</button>
+      </div>
+    </ul>
+    <button v-on:click="quit">Quit</button>
+  </div>
+</body>
+</html>

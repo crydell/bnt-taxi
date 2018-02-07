@@ -1,0 +1,16 @@
+body {
+	margin: 0;
+	padding: 0;
+}
+
+#my-map {
+	width: 90%;
+	height: 50vh;
+	border: 1px solid rgba(0,0,0,0.4);
+	box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
+	margin: 1em auto;
+}
+
+.popup-list {
+	padding-left: 0;
+}

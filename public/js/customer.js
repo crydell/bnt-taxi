@@ -11,7 +11,8 @@ var vm = new Vue({
     map: null,
     fromMarker: null,
     destMarker: null,
-    taxiMarkers: {}
+    taxiMarkers: {},
+    requestButton: null
   },
   created: function () {
     socket.on('initialize', function (data) {
@@ -62,25 +63,35 @@ var vm = new Vue({
         attribution: osmAttrib,
         maxZoom: 18
     }).addTo(this.map);
-    this.map.on('move', this.handleMove);
-    this.fromMarker = L.marker(this.map.getCenter(), {icon: this.fromIcon}).addTo(this.map);
+//    this.map.on('move', this.handleMove);
+//    this.fromMarker = L.marker(this.map.getCenter(), {icon: this.fromIcon}).addTo(this.map);
 
     var orderControl = L.Control.extend({
       options: {
-        position: 'topright' 
+        position: 'topleft' 
       },
 
       onAdd: function (map) {
           var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom orderButton'); 
           container.style.backgroundColor = 'white';
+          container.style.opacity = 0.7;
 
           return container;
       }
     });
       
-    var orderButton = new orderControl();
-    this.map.addControl(orderButton); 
-    orderButton.getContainer().onclick = this.orderTaxi;
+    var topLeftControl = L.Control.extend({
+      options: {
+        position: 'topleft' 
+      },
+
+      onAdd: function (map) {
+          var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom orderButton'); 
+          return container;
+      }
+    });
+      
+    this.requestButton = new topLeftControl();
       
     var searchDestControl = L.esri.Geocoding.geosearch({
             allowMultipleResults: false, 
@@ -88,41 +99,65 @@ var vm = new Vue({
             placeholder: "Where do you want to go?",
             expanded: true,
             collapseAfterResult: false,
-            position: 'topright'
+            position: 'topleft',
+            useMapBounds: false
         }
-    ).addTo(this.map);
+    );
       
-    var mapHalfHeight = this.map.getSize().y / 2;
-    var mapHalfWidth = this.map.getSize().x / 2;
+    var searchFromControl = L.esri.Geocoding.geosearch({
+            allowMultipleResults: false, 
+            zoomToResult: false, 
+            placeholder: "Where are you?",
+            expanded: true,
+            collapseAfterResult: false,
+            position: 'topleft',
+            useMapBounds: false
+        }
+    );
+
+    var orderButton = new orderControl();
+    this.map.addControl(orderButton); 
+    this.map.addControl(searchDestControl);      
+    this.map.addControl(searchFromControl);
+
+    var myLocationButton = new orderControl();
+    this.map.addControl(myLocationButton);
+      
+    myLocationButton.getContainer().style.position = 'absolute';
+    myLocationButton.getContainer().style.right = '0px';
+    myLocationButton.getContainer().innerHTML += "My location";
+    myLocationButton.getContainer().style.marginTop = '1em';
+    myLocationButton.getContainer().style.marginTop = '1em';
+    myLocationButton.getContainer().style.marginRight = '0.5em';
+    myLocationButton.getContainer().style.background = 'cornflowerblue';
+    myLocationButton.getContainer().onclick = this.setMyLocation;
+      
     var container = searchDestControl.getContainer();
-    var containerHalfHeight = parseInt(container.offsetHeight / 2);
-    var containerHalfWidth = parseInt(container.offsetWidth / 2);
-      
-    var containerTop = 0 - containerHalfHeight + 'px';
 
     container.style.position = 'absolute';
-    container.style.top = "50px";
-    container.style.right = mapHalfWidth - containerHalfWidth + 'px';
+    container.style.top = '30px';
+    container.style.width = 0.9 * this.map.getSize().x + 'px';
+    container.style.marginTop = '2em';
+    container.firstChild.className += " searchDest";
+    searchFromControl.getContainer().style.position = 'absolute';
+    searchFromControl.getContainer().style.marginTop = '1em'; 
+    searchFromControl.getContainer().style.width = 0.7 * this.map.getSize().x + 'px';
+    searchFromControl.getContainer().firstChild.className += " searchFrom";
     
-    var orderButtonWidth = mapHalfWidth / 2;
+    var orderButtonWidth = this.map.getSize().x - 4;
     orderButton.getContainer().style.width = orderButtonWidth + 'px';
-    orderButton.getContainer().style.height = mapHalfHeight / 10 + 'px';  
-    orderButton.getContainer().style.right = mapHalfWidth - (orderButtonWidth / 2) + 'px';
-    orderButton.getContainer().style.top = 1.7 * mapHalfHeight + "px"; 
-    orderButton.getContainer().innerHTML += "Order taxi";
+    orderButton.getContainer().style.height = this.map.getSize().y / 6 + 'px';  
+    orderButton.getContainer().style.left = '0px';    
+    orderButton.getContainer().style.marginLeft = '0px';   
+    orderButton.getContainer().style.top = "0px"; 
+    orderButton.getContainer().style.marginTop = '0px';    
+      
+    searchFromControl.on("results", function(data) {
+        this.handleFromMarker(data);
+    }.bind(this));
       
     searchDestControl.on("results", function(data) {
-        if (this.destMarker == null) {
-            this.destMarker = L.marker(data.latlng, {draggable: true}).addTo(this.map);
-            this.destMarker.on("drag", this.moveMarker);
-            if (this.fromMarker != null) {
-                this.connectMarkers = L.polyline([this.fromMarker.getLatLng(), this.destMarker.getLatLng()], {color: 'blue'}).addTo(this.map);   
-            }
-        } else {
-            this.destMarker.setLatLng(data.latlng);
-            this.moveMarker();
-        }
-        
+        this.handleDestMarker(data);
     }.bind(this));
   },
   methods: {
@@ -138,13 +173,57 @@ var vm = new Vue({
                                        orderItems: { passengers: 1, bags: 1, animals: "doge" }
                                      });
     },
-    handleMove: function (event) {
-        this.fromMarker.setLatLng(this.map.getCenter());  
-        this.moveMarker();
-    },
     moveMarker: function (event) {
         if (this.fromMarker == null || this.destMarker == null) return;
         this.connectMarkers.setLatLngs([this.fromMarker.getLatLng(), this.destMarker.getLatLng()], {color: 'blue'});
-    }   
+    },
+    handleFromMarker: function (event) {
+        if (this.fromMarker == null) {
+            this.fromMarker = L.marker(event.latlng, {icon: this.fromIcon}).addTo(this.map);
+            this.fromMarker.on("drag", this.moveMarker);
+            if (this.destMarker != null) {
+                this.connectMarkers = L.polyline([this.fromMarker.getLatLng(), this.destMarker.getLatLng()], {color: 'blue'}).addTo(this.map);   
+                this.map.flyToBounds([this.fromMarker.getLatLng(), this.destMarker.getLatLng()], {paddingTopLeft: [100, 100]});
+                this.addRequestButton();
+            }
+        } else {
+            this.fromMarker.setLatLng(event.latlng);
+            this.moveMarker();
+            this.map.flyToBounds([this.fromMarker.getLatLng(), this.destMarker.getLatLng()], {paddingTopLeft: [100, 100]}); 
+        }
+        document.getElementsByClassName("searchFrom")[0].placeholder = event.text;
+    },
+    handleDestMarker: function (event) {
+        if (this.destMarker == null) {
+            this.destMarker = L.marker(event.latlng, {draggable: true}).addTo(this.map);
+            this.destMarker.on("drag", this.moveMarker);
+            if (this.fromMarker != null) {
+                this.connectMarkers = L.polyline([this.fromMarker.getLatLng(), this.destMarker.getLatLng()], {color: 'blue'}).addTo(this.map);   
+                this.map.flyToBounds([this.fromMarker.getLatLng(), this.destMarker.getLatLng()], {paddingTopLeft: [100, 100]});
+                this.addRequestButton();
+            }
+        } else {
+            this.destMarker.setLatLng(event.latlng);
+            this.moveMarker();
+            this.map.flyToBounds([this.fromMarker.getLatLng(), this.destMarker.getLatLng()], {paddingTopLeft: [100, 100]});
+        }
+        document.getElementsByClassName("searchDest")[0].placeholder = event.text;
+    },
+    setMyLocation: function (event) {
+        this.handleFromMarker( {latlng: L.latLng(59.84092, 17.64728), text: "Polacksbacken"});
+    },
+    addRequestButton: function (event) {
+        this.map.addControl(this.requestButton);
+        var c = this.requestButton.getContainer();
+        c.style.position = "relative";
+        c.style.width = "100px";
+        c.style.height = "30px";
+
+        c.style.left = this.map.getSize().x / 2 - 50 + 'px';
+        c.style.marginLeft = "0px";
+        c.style.backgroundColor = "forestgreen";
+        c.innerHTML += "Order";
+        c.onclick = this.orderTaxi;
+    }
   }
 });

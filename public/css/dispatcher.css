@@ -1,0 +1,182 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto|Roboto+Slab');
+
+h1, h2, h3 {
+    font-family: "Roboto Slab", serif;
+}
+
+body {
+    display: flex;
+    height: 100vh;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: "Roboto", sans-serif;
+    color: #333;
+}
+
+#page {
+    display: grid;
+    grid-template-columns: 40% 60%;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+}
+
+.left {
+    grid-column: 1;
+}
+
+.right {
+    grid-column: 2;
+}
+
+section {
+    padding: 1em;
+}
+
+
+
+/* ===========================================
+
+Header
+
+=========================================== */
+
+header {
+    padding: 0.5em 1em;
+    margin: 0 1em;
+    border-bottom: 4px dashed;
+}
+
+header h1, header h2 {
+    padding: 0;
+    margin: 0;
+}
+
+header h1 {
+    font-size: 4em;
+}
+
+.header-bnt {
+    
+}
+
+.header-taxi {
+    color: #39f;
+}
+
+header h2 {
+    font-size: 2em;
+}
+
+
+
+/* ===========================================
+
+Assignment menu
+
+=========================================== */
+
+#assignment {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/*
+  Navigation menu
+*/
+
+nav ul {
+    padding: 0;
+    margin: 0;
+    border-bottom: 4px solid #ccc;
+}
+
+nav li {
+    min-width: 5em;
+    padding: 1em 2em;
+    margin: 0 0.2em 0 0;
+    display: inline-block;
+    background-color: #bbb;
+    cursor: pointer;
+    text-align: center;
+    color: #fff;
+}
+
+nav li:hover, nav li.selected {
+    background-color: #ccc;
+}
+
+
+/*
+  List of orders/taxis/ongoing routes
+*/
+
+.assignment-list {
+    padding: 0;
+    margin: 0;
+    flex-grow: 1;
+    overflow: auto;
+}
+
+.assignment-list-item {
+    overflow: auto;
+    background-color: #ccc;
+    border-bottom: 1px solid #bbb;
+    padding: 1em 2em;
+    list-style-type: none;
+    cursor: pointer;
+}
+
+.assignment-list-item h3 {
+    display: inline-block;
+    width: 100%;
+    margin: 0;
+}
+
+.assignment-list-item:hover, .assignment-list-item.selected {
+    background-color: #ddd;
+}
+
+.assignment-list .from {
+    float: left;
+}
+
+.assignment-list .to {
+    float: right;
+}
+
+.assignment-selection {
+    padding: 0;
+    margin: 0;
+}
+
+.assignment-selection > li {
+    border-bottom: 1px solid #ddd;
+    background-color: #eee;
+    cursor: pointer;
+    list-style-type: none;
+}
+
+.assignment-selection > li:hover {
+    background-color: #f8f8f8;
+}
+
+
+
+/* ===========================================
+
+Map area
+
+=========================================== */
+
+#maps {
+    grid-column: 2;
+}
+
+#my-map {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    box-shadow: none;
+}

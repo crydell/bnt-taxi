@@ -6,12 +6,15 @@ var socket = io();
 
 var vm = new Vue({
   el: '#page',
-  data: {
-    orders: {},
-    taxis: {},
-    customerMarkers: {},
-    taxiMarkers: {}
-  },
+    data: {
+	selectedOrder: null,
+	selectedTaxi: null,
+	currentAssignmentMenu: "orders",
+	orders: {},
+	taxis: {},
+	customerMarkers: {},
+	taxiMarkers: {}
+    },
 
   created: function () {
     socket.on('initialize', function (data) {

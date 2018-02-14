@@ -6,32 +6,128 @@
   <title>TAXI DISPATCHER</title>
   <link rel="stylesheet" href="leaflet/leaflet.css">
   <link rel="stylesheet" href="css/taxi.css">
+  <link rel="stylesheet" href="css/dispatcher.css">
   <script src="/vue/vue.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/leaflet/leaflet.js"></script>
   <script src="js/dispatcher.js" defer></script>
 </head>
 <body>
-  <h1>
-    TAXI DISPATCHER
-  </h1>
-  <div id="page">
-    <div id="my-map"></div>
-    <h1>Orders</h1>
-    <ul>
-      <li v-for="order in orders">
-        # {{ order.orderId}} From: {{ order.fromLatLong[0].toFixed(3) }}, {{ order.fromLatLong[1].toFixed(3) }} Destination: {{ order.destLatLong[0].toFixed(3) }}, {{ order.destLatLong[1].toFixed(3) }}
-        <ul>
-          <li v-for="(item, key) in order.orderItems">
-            {{ key + ": " + item }}
-          </li>
-        </ul>
-        <select v-on:change="assignTaxi(order)" v-model="order.taxiId">
-          <option disabled value="">Assign a taxi</option>
-          <option v-for="taxi in taxis" :value="taxi.taxiId"># {{ taxi.taxiId}} Pos: {{ taxi.latLong[0].toFixed(3) }}, {{ taxi.latLong[1].toFixed(3) }} </option>
-        </select> {{ order.taxiIdConfirmed }}
-      </li>
-    </ul>
-  </div>
+  <header>
+    <h1><span class="bnt">bnt\</span><span class="header-taxi">taxi</span></h1>
+    <h2>Dispatch</h2>
+  </header>
+  
+  <main id="page">
+    
+    <!-- Section for the assignment of customers to cars -->
+    <section id="assignment" class="left">
+
+      <!-- Navigation bar for assignment menu -->
+      <nav>
+	<ul>
+	  <li
+	    v-bind:class="{selected: currentAssignmentMenu == 'orders'}"
+	    v-on:click="currentAssignmentMenu = 'orders'">
+	    Orders
+	  </li>
+	  
+	  <li v-bind:class="{selected: currentAssignmentMenu == 'taxis'}"
+	      v-on:click="currentAssignmentMenu = 'taxis'">
+	    Taxis
+	  </li>
+	  
+	  <li v-bind:class="{selected: currentAssignmentMenu == 'ongoing'}"
+	      v-on:click="currentAssignmentMenu = 'ongoing'">
+	    Ongoing
+	  </li>
+	</ul>
+      </nav>
+      
+
+      <!-- List of pending orders -->
+      
+      <ul class="assignment-list" v-if="currentAssignmentMenu == 'orders'">
+	<div v-for="order in orders">
+	  <li class="assignment-list-item"
+	      v-on:click="selectedOrder = (selectedOrder != order) ? order : null"
+	      v-bind:class="{selected: selectedOrder == order}">
+	    <h3>
+	      <span class="from">
+		Going from
+		{{order.fromLatLong[0].toFixed(3)}},
+		{{order.fromLatLong[1].toFixed(3)}}
+	      </span>
+	      <span class="to">
+		Going to
+		{{order.destLatLong[0].toFixed(3)}},
+		{{order.destLatLong[1].toFixed(3)}}
+	      </span>
+	    </h3>
+	    
+	    <ul>
+              <li v-for="(item, key) in order.orderItems">
+		{{ key + ": " + item }}
+              </li>
+            </ul>
+	    
+	  </li>
+	  <ul v-if="order == selectedOrder" class="assignment-selection">
+	    <li v-for="taxi in taxis" v-on:click="assignTaxi(order)">
+	      Taxi ID: #{{taxi.taxiId}}
+	      Current position: {{ taxi.latLong[0].toFixed(3) }}, {{ taxi.latLong[1].toFixed(3) }}
+	    </li>
+	  </ul>
+	</div>
+
+	
+	<li class="assignment-list-item" v-if="Object.keys(orders).length == 0">
+	  <h2>There are no customers waiting</h2>
+	</li>
+      </ul>
+
+
+      <!-- List of available taxis -->
+      
+      <ul class="assignment-list" v-if="currentAssignmentMenu == 'taxis'">
+	<div v-for="taxi in taxis">
+	  <li class="assignment-list-item"
+	      v-on:click="selectedTaxi = (selectedTaxi != taxi) ? taxi : null"
+	      v-bind:class="{selected: selectedTaxi == taxi}">
+	    <p>Taxi ID: #{{taxi.taxiId}}</p>
+	    <p>Current position: {{ taxi.latLong[0].toFixed(3) }}, {{ taxi.latLong[1].toFixed(3) }}</p>
+	  </li>
+	  
+	  <ul v-if="taxi == selectedTaxi" class="assignment-selection">
+	    <li v-for="order in orders" v-on:click="assignTaxi(order)">
+	      Order ID: #{{order.orderId}}
+	      Current position: {{ order.fromLatLong[0].toFixed(3) }}, {{ order.fromLatLong[1].toFixed(3) }}
+	    </li>
+	  </ul>
+	</div>
+
+	
+	<li class="assignment-list-item" v-if="Object.keys(taxis).length == 0">
+	  <h2>There are no taxis currently available</h2>
+	</li>
+      </ul>
+
+      
+
+      
+      <ul class="assignment-list" v-if="currentAssignmentMenu == 'ongoing'">
+	<!-- TODO -->
+	<li class="assignment-list-item">
+	  <h2>There are no currently ongoing trips</h2>
+	</li>
+      </ul>
+    </section>
+
+
+    <!-- Section for map with information -->
+    <section id="maps">
+      <div id="my-map"></div>
+    </section>
+  </main>
 </body>
 </html>

@@ -114,6 +114,7 @@ html {
 }
 
 #additional input {
+    max-width: 3em;
     float: right;
 }
 

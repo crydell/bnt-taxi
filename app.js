@@ -144,7 +144,19 @@ io.on('connection', function (socket) {
   socket.on('orderAccepted', function(order) {
     data.updateOrderDetails(order);
     io.emit('orderAccepted', order );
-  })
+  });
+
+    socket.on('tripAssigned', function(trip) {
+	io.emit('tripAssigned', trip);
+    });
+
+    socket.on('driverWaiting', function(trip) {
+	io.emit('driverWaiting', trip);
+    });
+
+    socket.on('tripCompleted', function(trip) {
+	io.emit('tripCompleted', trip);
+    });
 });
 
 var server = http.listen(app.get('port'), function () {

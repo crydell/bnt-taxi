@@ -18,6 +18,59 @@
 <body>
   <div id="page">
     <div id="my-map"></div>
+
+    <!-- Keep an overlay over the map, so that non-leaflet things can be used-->
+    <div id="overlay">
+      <button v-show="requestButton == true" v-on:click="orderTaxi" id="send-order">
+	Send order
+      </button>
+
+      <button v-show="currentState == 'ordering'" v-on:click="showingMore = !showingMore" id="show-more">
+	<h3>{{ showingMore ? 'Hide' : 'Show' }} additional options</h3>
+      </button>
+      
+      <section v-show="showingMore && currentState == 'ordering'" transition="flyup" id="additional">
+	<form id="additional-form">
+	  <span>
+	    <label for="passengers">Number of passengers: </label>
+	    <input type="number" min="1" value="1" name="passengers">
+	  </span>
+	  <br>
+	  <span>
+	    <label for="bags">Number of bags: </label>
+	    <input type="number" min="0" value="0" name="bags">
+	  </span>
+	  <br>
+	  <span>
+	    <label for="wheelchair">Wheelchair required?</label>
+	    <input type="checkbox" name="wheelchair">
+	  </span>
+	  <br>
+	  <span>
+	    <label for="childseat">Children's seat required?</label>
+	    <input type="checkbox"  name="childseat">
+	  </span>
+	</form>
+      </section>
+      
+      <section v-show="currentState != 'ordering'" id="info">
+	<div v-show="currentState == 'assigning'">
+	  <p>Waiting for a driver to be dispatched...</p>
+	</div>
+	
+	<div v-show="currentState == 'waiting'">
+	  <p>A driver has been assigned to you and is on their way...</p>
+	</div>
+
+	<div v-show="currentState == 'travelling'">
+	  <p>You're on your way! Sit back and relax.</p>
+	</div>
+
+	<div v-show="currentState == 'thanking'">
+	  <p>Thank you for travelling with bnt\taxi!</p>
+	</div>
+      </section>
+    </div>
   </div>
 </body>
 </html>

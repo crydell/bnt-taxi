@@ -12,7 +12,9 @@ var vm = new Vue({
     fromMarker: null,
     destMarker: null,
     taxiMarkers: {},
-    requestButton: null
+      requestButton: false,
+      showingMore: false,
+      currentState: 'ordering'
   },
   created: function () {
     socket.on('initialize', function (data) {
@@ -37,6 +39,27 @@ var vm = new Vue({
       this.map.removeLayer(this.taxiMarkers[taxiId]);
       Vue.delete(this.taxiMarkers, taxiId);
     }.bind(this));
+
+      
+      socket.on('tripAssigned', function (trip) {
+	  if (trip.order == this.orderId){
+	      this.currentState = 'waiting';
+	  }
+      }.bind(this));
+
+      socket.on('driverWaiting', function (trip) {
+	  if (trip.order == this.orderId){
+	      this.currentState = 'travelling';
+	  }
+      }.bind(this));
+
+      socket.on('tripCompleted', function (trip) {
+	  if (trip.order == this.orderId){
+	      this.currentState = 'thanking';
+	      setTimeout(function(){this.currentState = 'ordering'; this.toggleSearch()}.bind(this), 5000);
+	  }
+      }.bind(this));
+      
 
     // These icons are not reactive
     this.taxiIcon = L.icon({
@@ -73,9 +96,6 @@ var vm = new Vue({
 
       onAdd: function (map) {
           var container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom orderButton'); 
-          container.style.backgroundColor = 'white';
-          container.style.opacity = 0.7;
-
           return container;
       }
     });
@@ -115,42 +135,25 @@ var vm = new Vue({
         }
     );
 
-    var orderButton = new orderControl();
-    this.map.addControl(orderButton); 
     this.map.addControl(searchDestControl);      
     this.map.addControl(searchFromControl);
 
     var myLocationButton = new orderControl();
     this.map.addControl(myLocationButton);
-      
-    myLocationButton.getContainer().style.position = 'absolute';
-    myLocationButton.getContainer().style.right = '0px';
+
+    myLocationButton.getContainer().id = "my-location-button";
     myLocationButton.getContainer().innerHTML += "My location";
-    myLocationButton.getContainer().style.marginTop = '1em';
-    myLocationButton.getContainer().style.marginTop = '1em';
-    myLocationButton.getContainer().style.marginRight = '0.5em';
-    myLocationButton.getContainer().style.background = 'cornflowerblue';
     myLocationButton.getContainer().onclick = this.setMyLocation;
       
     var container = searchDestControl.getContainer();
 
-    container.style.position = 'absolute';
-    container.style.top = '30px';
-    container.style.width = 0.9 * this.map.getSize().x + 'px';
-    container.style.marginTop = '2em';
-    container.firstChild.className += " searchDest";
-    searchFromControl.getContainer().style.position = 'absolute';
-    searchFromControl.getContainer().style.marginTop = '1em'; 
-    searchFromControl.getContainer().style.width = 0.7 * this.map.getSize().x + 'px';
-    searchFromControl.getContainer().firstChild.className += " searchFrom";
-    
-    var orderButtonWidth = this.map.getSize().x - 4;
-    orderButton.getContainer().style.width = orderButtonWidth + 'px';
-    orderButton.getContainer().style.height = this.map.getSize().y / 6 + 'px';  
-    orderButton.getContainer().style.left = '0px';    
-    orderButton.getContainer().style.marginLeft = '0px';   
-    orderButton.getContainer().style.top = "0px"; 
-    orderButton.getContainer().style.marginTop = '0px';    
+      container.id = "search-dest";
+      container.classList.add("location-input");
+      container.firstChild.classList.add("searchDest");
+      
+      searchFromControl.getContainer().classList.add("location-input");
+      searchFromControl.getContainer().id = "search-from";
+      searchFromControl.getContainer().firstChild.classList.add("searchFrom");
       
     searchFromControl.on("results", function(data) {
         this.handleFromMarker(data);
@@ -167,12 +170,31 @@ var vm = new Vue({
       marker.taxiId = taxi.taxiId;
       return marker;
     },
-    orderTaxi: function() {
+      getOrderItems: function() {
+	  var form = document.getElementById("additional-form");
+	  var data = new FormData(form);
+	  var dataobj = {};
+
+	  for (const [key, value] of data.entries()){
+	      dataobj[key] = value;
+	  }
+	  
+	  return dataobj;
+      },
+      
+      orderTaxi: function() {
+	  this.currentState = 'assigning';
+	  this.requestButton = false;
+	  this.toggleSearch();
             socket.emit("orderTaxi", { fromLatLong: [this.fromMarker.getLatLng().lat, this.fromMarker.getLatLng().lng],
                                        destLatLong: [this.destMarker.getLatLng().lat, this.destMarker.getLatLng().lng],
-                                       orderItems: { passengers: 1, bags: 1, animals: "doge" }
+                                       orderItems: this.getOrderItems()
                                      });
-    },
+      },
+      toggleSearch: function() {
+	  var search = document.getElementsByClassName("leaflet-top")[0];
+	  search.style.display = search.style.display != 'none' ? 'none' : 'inline';
+      },
     moveMarker: function (event) {
         if (this.fromMarker == null || this.destMarker == null) return;
         this.connectMarkers.setLatLngs([this.fromMarker.getLatLng(), this.destMarker.getLatLng()], {color: 'blue'});
@@ -212,18 +234,8 @@ var vm = new Vue({
     setMyLocation: function (event) {
         this.handleFromMarker( {latlng: L.latLng(59.84092, 17.64728), text: "Polacksbacken"});
     },
-    addRequestButton: function (event) {
-        this.map.addControl(this.requestButton);
-        var c = this.requestButton.getContainer();
-        c.style.position = "relative";
-        c.style.width = "100px";
-        c.style.height = "30px";
-
-        c.style.left = this.map.getSize().x / 2 - 50 + 'px';
-        c.style.marginLeft = "0px";
-        c.style.backgroundColor = "forestgreen";
-        c.innerHTML += "Order";
-        c.onclick = this.orderTaxi;
+      addRequestButton: function (event) {
+	  this.requestButton = true;
     }
   }
 });

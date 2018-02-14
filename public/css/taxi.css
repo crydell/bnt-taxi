@@ -4,8 +4,12 @@ html {
 	padding: 0;
 }
 
+#page {
+    width: 100%;
+}
+
 #my-map {
-	position: fixed;
+    position: fixed;
     top: 0;
     bottom: 0;
     left: 0;
@@ -13,13 +17,109 @@ html {
 }
 
 .popup-list {
-	padding-left: 0;
+    padding-left: 0;
+}
+
+/* Styling for location controls */
+
+.leaflet-top.leaflet-left {
+    width: 100%;
+    background-color: rgba(255,255,255,0.8);
+    padding-bottom: 1em;
+}
+
+.location-input {
+    width: 90% !important;
+    margin: 1.2em 5% !important;
+    z-index: 10000;
+}
+
+#search-dest {
+    z-index: 10001;
+}
+
+#search-from {
+    width: 60% !important;
+}
+
+#my-location-button {
+    margin: 0 5% !important;
+    position: absolute;
+    top: 4em;
+    right: 0;
 }
 
 .orderButton {
     text-align: center;
     margin: auto;
+    padding: 0.5em;
 
+    background-color: #08f;
+    color: #fff;
     font-family: 'Maven Pro';
     font-size: 16px;
 }
+
+
+/* Styling for the overlay and its content */
+
+#overlay {
+    margin: 0;
+    padding: 0;
+    position: fixed;
+    left: 0;
+    bottom: 0;
+    z-index: 999999;
+    width: 100%;
+}
+
+#show-more {
+    width: 90%;
+    margin: 5%;
+    padding: 0.5em 1em;
+    font-size: 1.2em;
+    background-color: #4af;
+    color: #fff;
+    border: none;
+    border-bottom: 2px solid #08f;
+    border-radius: 8px;
+}
+
+#send-order {
+    padding: 1em 2em;
+    margin: 1em auto;
+    display: block;
+    border-radius: 5px;
+    border: none;
+    border-bottom: 3px solid #17d;
+    background-color: #7cf;
+    color: #fff;
+    font-weight: bold;
+    font-size: 1.5em;
+}
+
+#additional {
+    background-color: #fff;
+    overflow: auto;
+    padding: 1em;
+}
+
+#additional span {
+    margin: 2em 0;
+    display: block;
+}
+
+#additional label {
+    float: left;
+}
+
+#additional input {
+    float: right;
+}
+
+#info {
+    background-color: #fff;
+    overflow: auto;
+    padding: 1em 2em;
+}
+

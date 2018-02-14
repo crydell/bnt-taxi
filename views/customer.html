@@ -28,38 +28,46 @@
       <button v-show="currentState == 'ordering'" v-on:click="showingMore = !showingMore" id="show-more">
 	<h3>{{ showingMore ? 'Hide' : 'Show' }} additional options</h3>
       </button>
-      
-      <section v-show="showingMore && currentState == 'ordering'" transition="flyup" id="additional">
-	<form id="additional-form">
-	  <span>
-	    <label for="passengers">Number of passengers: </label>
-	    <input type="number" min="1" value="1" name="passengers">
-	  </span>
-	  <br>
-	  <span>
-	    <label for="bags">Number of bags: </label>
-	    <input type="number" min="0" value="0" name="bags">
-	  </span>
-	  <br>
-	  <span>
-	    <label for="wheelchair">Wheelchair required?</label>
-	    <input type="checkbox" name="wheelchair">
-	  </span>
-	  <br>
-	  <span>
-	    <label for="childseat">Children's seat required?</label>
-	    <input type="checkbox"  name="childseat">
-	  </span>
-	</form>
-      </section>
+
+      <transition mode="out-in" name="fade">
+	<section v-show="showingMore && currentState == 'ordering'" id="additional">
+	  <form id="additional-form">
+	    <span>
+	      <label for="passengers">Number of passengers: </label>
+	      <input type="number" min="1" value="1" name="passengers">
+	    </span>
+	    <br>
+	    <span>
+	      <label for="bags">Number of bags: </label>
+	      <input type="number" min="0" value="0" name="bags">
+	    </span>
+	    <br>
+	    <span>
+	      <label for="wheelchair">Wheelchair required?</label>
+	      <input type="checkbox" name="wheelchair">
+	    </span>
+	    <br>
+	    <span>
+	      <label for="childseat">Children's seat required?</label>
+	      <input type="checkbox"  name="childseat">
+	    </span>
+	  </form>
+	</section>
+      </transition>
       
       <section v-show="currentState != 'ordering'" id="info">
 	<div v-show="currentState == 'assigning'">
+	  <img class="loading-icon" src="img/loading.png"></img>
 	  <p>Waiting for a driver to be dispatched...</p>
 	</div>
 	
 	<div v-show="currentState == 'waiting'">
-	  <p>A driver has been assigned to you and is on their way...</p>
+	  <img class="loading-icon" src="img/loading.png"></img>
+	  <p>A driver is on its way, please wait...</p>
+	</div>
+
+	<div v-show="currentState == 'arrived'">
+	  <p>Your driver is here! Proceed to the car...</p>
 	</div>
 
 	<div v-show="currentState == 'travelling'">

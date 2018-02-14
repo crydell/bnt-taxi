@@ -109,6 +109,9 @@ var vm = new Vue({
       markAtCustomer: function () {
 	  socket.emit("driverWaiting", {order: this.assignedOrder});
       },
+      markCustomerReady: function () {
+	  socket.emit("tripBegin", {order: this.assignedOrder});
+      },
       markTripComplete: function () {
 	  socket.emit("tripCompleted", {order: this.assignedOrder});
       }

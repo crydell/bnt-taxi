@@ -49,6 +49,12 @@ var vm = new Vue({
 
       socket.on('driverWaiting', function (trip) {
 	  if (trip.order == this.orderId){
+	      this.currentState = 'arrived';
+	  }
+      }.bind(this));
+
+      socket.on('tripBegin', function (trip) {
+	  if (trip.order == this.orderId){
 	      this.currentState = 'travelling';
 	  }
       }.bind(this));

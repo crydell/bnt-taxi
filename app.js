@@ -154,6 +154,10 @@ io.on('connection', function (socket) {
 	io.emit('driverWaiting', trip);
     });
 
+    socket.on('tripBegin', function(trip) {
+	io.emit('tripBegin', trip);
+    });
+
     socket.on('tripCompleted', function(trip) {
 	io.emit('tripCompleted', trip);
     });

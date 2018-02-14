@@ -123,3 +123,13 @@ html {
     padding: 1em 2em;
 }
 
+.loading-icon {
+    animation: spin 4s linear infinite;
+    float: left;
+    margin-right: 1em;
+}
+
+@keyframes spin {
+    from {transform: rotate(0deg);}
+    to {transform: rotate(360deg);}
+}

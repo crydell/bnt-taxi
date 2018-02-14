@@ -120,7 +120,7 @@ var vm = new Vue({
       return {from: fromMarker, dest: destMarker, line: connectMarkers};
     },
     assignTaxi: function (order) {
-      socket.emit("taxiAssigned", order);
+	socket.emit("tripAssigned", {order: order.orderId});
     }
   }
 });

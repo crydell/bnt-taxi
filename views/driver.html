@@ -16,7 +16,7 @@
   	<h1>
 	    TAXI DRIVER # {{ taxiId }}
 	  </h1>
-    <div id="my-map"></div>
+    <div id="my-map" style="position: relative; height: 40em"></div>
     <ul>
       <div v-for="order in orders" v-if="order.taxiId == taxiId">
         # {{ order.orderId}} From: {{ order.fromLatLong[0].toFixed(3) }}, {{ order.fromLatLong[1].toFixed(3) }} Destination: {{ order.destLatLong[0].toFixed(3) }}, {{ order.destLatLong[1].toFixed(3) }}
@@ -28,6 +28,9 @@
         <button v-on:click="acceptOrder(order)">ACCEPT</button><button v-on:click="finishOrder(order.orderId)">FINISH</button>
       </div>
     </ul>
+    
+    <button v-on:click="markAtCustomer">Mark that you're at the customer</button>
+    <button v-on:click="markTripComplete">Mark that the trip is complete</button>
     <button v-on:click="quit">Quit</button>
   </div>
 </body>

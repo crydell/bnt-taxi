@@ -11,7 +11,8 @@ var vm = new Vue({
     taxiId: 0,
     taxiLocation: null,
     orders: {},
-    customerMarkers: {}
+      customerMarkers: {},
+      assignedOrder: 0
   },
   created: function () {
     socket.on('initialize', function (data) {
@@ -20,6 +21,9 @@ var vm = new Vue({
     socket.on('currentQueue', function (data) {
       this.orders = data.orders;
     }.bind(this));
+      socket.on('tripAssigned', function(order) {
+	  this.assignedOrder = order.order 
+      }.bind(this));
     // this icon is not reactive
     this.taxiIcon = L.icon({
       iconUrl: "img/taxi.png",
@@ -102,5 +106,11 @@ var vm = new Vue({
       var connectMarkers = L.polyline([order.fromLatLong, order.destLatLong], {color: 'blue'}).addTo(this.map);
       return {from: fromMarker, dest: destMarker, line: connectMarkers};
     },
+      markAtCustomer: function () {
+	  socket.emit("driverWaiting", {order: this.assignedOrder});
+      },
+      markTripComplete: function () {
+	  socket.emit("tripCompleted", {order: this.assignedOrder});
+      }
   }
 });

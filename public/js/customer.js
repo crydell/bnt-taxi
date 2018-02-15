@@ -103,8 +103,6 @@ var vm = new Vue({
         attribution: osmAttrib,
         maxZoom: 18
     }).addTo(this.map);
-//    this.map.on('move', this.handleMove);
-//    this.fromMarker = L.marker(this.map.getCenter(), {icon: this.fromIcon}).addTo(this.map);
 
     var orderControl = L.Control.extend({
       options: {
@@ -153,9 +151,9 @@ var vm = new Vue({
             searchBounds: [[63.431, 10.392], [56.508, 21.011]]
         }
     );
-
-    this.map.addControl(searchDestControl);      
+      
     this.map.addControl(searchFromControl);
+    this.map.addControl(searchDestControl);      
 
     var myLocationButton = new orderControl();
     this.map.addControl(myLocationButton);
@@ -173,6 +171,37 @@ var vm = new Vue({
       searchFromControl.getContainer().classList.add("location-input");
       searchFromControl.getContainer().id = "search-from";
       searchFromControl.getContainer().firstChild.classList.add("searchFrom");
+      
+      
+    document.getElementsByClassName("searchFrom")[0].onfocus = function () {
+        this.requestButton = false;
+        if (this.fromMarker != null) {            
+            this.map.removeLayer(this.fromMarker);
+        }
+        
+        this.fromMarker = null;
+        
+        if (this.connectMarkers != null) {
+            this.map.removeLayer(this.connectMarkers);            
+        }
+        
+        this.connectMarkers = null;
+    }.bind(this); 
+      
+    document.getElementsByClassName("searchDest")[0].onfocus = function () {
+        this.requestButton = false;
+        if (this.destMarker != null) {            
+            this.map.removeLayer(this.destMarker);
+        }
+        
+        this.destMarker = null;
+        
+        if (this.connectMarkers != null) {
+            this.map.removeLayer(this.connectMarkers);            
+        }
+        
+        this.connectMarkers = null;
+    }.bind(this); 
       
     searchFromControl.on("results", function(data) {
         this.handleFromMarker(data);

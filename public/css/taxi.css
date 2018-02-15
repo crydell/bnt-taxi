@@ -23,19 +23,21 @@ html {
 /* Styling for location controls */
 
 .leaflet-top.leaflet-left {
+    position: fixed;
     width: 100%;
     background-color: rgba(255,255,255,0.8);
+    z-index: 9999;
     padding-bottom: 1em;
 }
 
 .location-input {
     width: 90% !important;
     margin: 1.2em 5% !important;
-    z-index: 10000;
+    z-index: 10001;
 }
 
 #search-dest {
-    z-index: 10001;
+    z-index: 10000;
 }
 
 #search-from {
@@ -45,7 +47,7 @@ html {
 #my-location-button {
     margin: 0 5% !important;
     position: absolute;
-    top: 4em;
+    top: 0.6em;
     right: 0;
 }
 
@@ -69,7 +71,7 @@ html {
     position: fixed;
     left: 0;
     bottom: 0;
-    z-index: 999999;
+    z-index: 9998;
     width: 100%;
 }
 

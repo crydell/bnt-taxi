@@ -11,6 +11,7 @@ var vm = new Vue({
     map: null,
     fromMarker: null,
     destMarker: null,
+    connectMarkers: null,
     taxiMarkers: {},
       requestButton: false,
       showingMore: false,
@@ -33,6 +34,15 @@ var vm = new Vue({
 
     socket.on('taxiMoved', function (taxi) {
       this.taxiMarkers[taxi.taxiId].setLatLng(taxi.latLong);
+        if (this.currentState == 'waiting'
+                    || this.currentState == 'arrived'
+                    || this.currentState == 'travelling') {
+            this.map.setView(taxi.latLong);
+            
+            if (this.currentState == 'travelling') {
+                this.connectMarkers.setLatLngs([taxi.latLong, this.destMarker.getLatLng()], {color: 'blue'});            
+            }
+        }
     }.bind(this));
 
     socket.on('taxiQuit', function (taxiId) {
@@ -56,6 +66,7 @@ var vm = new Vue({
       socket.on('tripBegin', function (trip) {
 	  if (trip.order == this.orderId){
 	      this.currentState = 'travelling';
+          this.map.removeLayer(this.fromMarker);
 	  }
       }.bind(this));
 
@@ -126,7 +137,8 @@ var vm = new Vue({
             expanded: true,
             collapseAfterResult: false,
             position: 'topleft',
-            useMapBounds: false
+            useMapBounds: false,
+            searchBounds: [[63.431, 10.392], [56.508, 21.011]]
         }
     );
       
@@ -137,7 +149,8 @@ var vm = new Vue({
             expanded: true,
             collapseAfterResult: false,
             position: 'topleft',
-            useMapBounds: false
+            useMapBounds: false,
+            searchBounds: [[63.431, 10.392], [56.508, 21.011]]
         }
     );
 

@@ -19,6 +19,13 @@
   <div id="page">
     <div id="my-map"></div>
 
+
+    <!-- Overlay for the search controls, populated in the javascript -->
+    <section id="map-search-area">
+      
+    </section>
+
+    
     <!-- Keep an overlay over the map, so that non-leaflet things can be used-->
     <div id="overlay">
       <button v-show="requestButton == true" v-on:click="orderTaxi" id="send-order">

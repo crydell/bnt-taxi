@@ -157,21 +157,28 @@ var vm = new Vue({
 
     var myLocationButton = new orderControl();
     this.map.addControl(myLocationButton);
-
-    myLocationButton.getContainer().id = "my-location-button";
-    myLocationButton.getContainer().innerHTML += "My location";
-    myLocationButton.getContainer().onclick = this.setMyLocation;
       
-    var container = searchDestControl.getContainer();
+      var container = searchFromControl.getContainer();
+      
+      container.classList.add("location-input");
+      container.id = "search-from";
+      container.firstChild.classList.add("searchFrom");
+      document.getElementById('map-search-area').appendChild(container);
 
+      container = searchDestControl.getContainer();
+      
       container.id = "search-dest";
       container.classList.add("location-input");
       container.firstChild.classList.add("searchDest");
+      document.getElementById('map-search-area').appendChild(container);
+
       
-      searchFromControl.getContainer().classList.add("location-input");
-      searchFromControl.getContainer().id = "search-from";
-      searchFromControl.getContainer().firstChild.classList.add("searchFrom");
+      container = myLocationButton.getContainer();
       
+      container.id = "my-location-button";
+      container.innerHTML += "My location";
+      container.onclick = this.setMyLocation;
+      document.getElementById('map-search-area').appendChild(container);
       
     document.getElementsByClassName("searchFrom")[0].onfocus = function () {
         this.requestButton = false;
@@ -240,7 +247,7 @@ var vm = new Vue({
                                      });
       },
       toggleSearch: function() {
-	  var search = document.getElementsByClassName("leaflet-top")[0];
+	  var search = document.getElementById('map-search-area');
 	  search.style.display = search.style.display != 'none' ? 'none' : 'inline';
       },
     moveMarker: function (event) {

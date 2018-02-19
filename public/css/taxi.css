@@ -22,12 +22,14 @@ html {
 
 /* Styling for location controls */
 
-.leaflet-top.leaflet-left {
+#map-search-area {
     position: fixed;
-    width: 100%;
+    left: 0;
+    top: 0;
+    width: 100vw;
     background-color: rgba(255,255,255,0.8);
-    z-index: 9999;
     padding-bottom: 1em;
+    z-index: 9999;
 }
 
 .location-input {

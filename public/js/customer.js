@@ -259,7 +259,8 @@ var vm = new Vue({
 	    this.toggleSearch();
             socket.emit("orderTaxi", { fromLatLong: [this.fromMarker.getLatLng().lat, this.fromMarker.getLatLng().lng],
                                        destLatLong: [this.destMarker.getLatLng().lat, this.destMarker.getLatLng().lng],
-                                       orderItems: this.getOrderItems()
+                                       orderItems: this.getOrderItems(),
+				       timeJoined: new Date().getTime()
                                      });
 	},
 	toggleSearch: function() {

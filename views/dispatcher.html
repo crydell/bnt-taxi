@@ -63,6 +63,9 @@
 		  {{order.destLatLong[1].toFixed(3)}}
 		</span>
 	      </h3>
+	      <p>Has been waiting for
+		{{ Math.round((((new Date() - order.timeJoined) % 86400000) % 3600000) / 60000) }}
+		minutes</p>
 	      <p v-show="orderIsPending(order)">Waiting for both parties to accept</p>
 
 	      <ul>

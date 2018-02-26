@@ -221,7 +221,7 @@ io.on('connection', function (socket) {
 	data.finishOrder(trip.order.orderId);
 	io.emit('tripCompleted', trip);
 	io.emit('currentTrips', { trips: data.getAllTrips()});
-	io.emit('currentQueue', { orders: data.getAllOrders() });
+	io.emit('orderFinished', trip.order.orderId);
     });
 });
 

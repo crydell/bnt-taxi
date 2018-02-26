@@ -128,6 +128,27 @@ html {
     padding: 1em 2em;
 }
 
+.accept-btn, .decline-btn {
+    border: none;
+    border-bottom: 2px solid;
+    border-radius: 4px;
+    padding: 1em;
+    width: 45%;
+    color: #fff;
+}
+
+.accept-btn {
+    float: left;
+    border-color: #3b3;
+    background-color: #4e2;
+}
+
+.decline-btn {
+    float: right;
+    border-color: #b00;
+    background-color: #f20;
+}
+
 .loading-icon {
     animation: spin 4s linear infinite;
     float: left;

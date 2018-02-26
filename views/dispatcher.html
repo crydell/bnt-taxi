@@ -63,7 +63,7 @@
 		  {{order.destLatLong[1].toFixed(3)}}
 		</span>
 	      </h3>
-	      <p v-show="orderIsPending(order)">The order is pending assignment</p>
+	      <p v-show="orderIsPending(order)">Waiting for both parties to accept</p>
 
 	      <ul>
 		<li v-for="(item, key) in order.orderItems">
@@ -81,7 +81,7 @@
 	  </div>
 
 	  
-	  <li class="assignment-list-item" v-if="Object.keys(orders).length == 0">
+	  <li class="assignment-list-item" v-if="ordersLength() == 0">
 	    <h2>There are no customers waiting</h2>
 	  </li>
 	</ul>
@@ -90,16 +90,17 @@
 	<!-- List of available taxis -->
 	
 	<ul class="assignment-list" v-if="currentAssignmentMenu == 'taxis'">
-	  <div v-for="taxi in taxis">
+	  <div v-for="taxi in taxis" v-if="!taxiIsAssigned(taxi)">
 	    <li class="assignment-list-item"
 		v-on:click="selectedTaxi = (selectedTaxi != taxi) ? taxi : null"
 		v-bind:class="{selected: selectedTaxi == taxi}">
 	      <p>Taxi ID: #{{taxi.taxiId}}</p>
 	      <p>Current position: {{ taxi.latLong[0].toFixed(3) }}, {{ taxi.latLong[1].toFixed(3) }}</p>
+	      <p v-show="taxiIsPending(taxi)">Waiting for both parties to accept</p>
 	    </li>
 	    
 	    <ul v-if="taxi == selectedTaxi" class="assignment-selection">
-	      <li v-for="order in orders" v-on:click="assignTaxi(order)">
+	      <li v-for="order in orders" v-on:click="assignTaxi(order, taxi)">
 		Order ID: #{{order.orderId}}
 		Current position: {{ order.fromLatLong[0].toFixed(3) }}, {{ order.fromLatLong[1].toFixed(3) }}
 	      </li>
@@ -107,24 +108,33 @@
 	  </div>
 
 	  
-	  <li class="assignment-list-item" v-if="Object.keys(taxis).length == 0">
+	  <li class="assignment-list-item" v-if="taxisLength() == 0">
 	    <h2>There are no taxis currently available</h2>
 	  </li>
 	</ul>
 
-	
 
+	<!-- List of ongoing trips -->
 	
 	<ul class="assignment-list" v-if="currentAssignmentMenu == 'ongoing'">
-	  <!-- TODO -->
 	  <div v-for="trip in trips">
-	    <li class="assignment-list-item">
+	    <li class="assignment-list-item"
+		v-on:click="selectedTrip = (selectedTrip != trip) ? trip : null"
+		v-bind:class="{selected: selectedTrip == trip}">
 	      <p>Trip ID: #{{trip.tripId}}</p>
-	      <p></p>
 	    </li>
+	    
+	    <ul v-if="trip == selectedTrip" class="assignment-selection">
+	      <li>
+		<p>Order ID: {{trip.order.orderId}} </p>
+		<p>Taxi ID: {{trip.taxi.taxiId}} </p>
+		<p>The driver has {{trip.driverAccept ? "accepted" : "not accepted"}} the assignment</p>
+		<p>The customer has {{trip.customerAccept ? "accepted" : "not accepted"}} the assignment </p>
+	      </li>
+	    </ul>
 	  </div>
 	  
-	  <li class="assignment-list-item">
+	  <li class="assignment-list-item" v-if="Object.keys(trips).length == 0">
 	    <h2>There are no currently ongoing trips</h2>
 	  </li>
 	</ul>

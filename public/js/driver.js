@@ -12,7 +12,8 @@ var vm = new Vue({
     taxiLocation: null,
     orders: {},
       customerMarkers: {},
-      assignedOrder: 0
+      assignedTrip: null,
+			currentState: 'inactive'
   },
   created: function () {
     socket.on('initialize', function (data) {
@@ -21,9 +22,25 @@ var vm = new Vue({
     socket.on('currentQueue', function (data) {
       this.orders = data.orders;
     }.bind(this));
-      socket.on('tripAssigned', function(order) {
-	  this.assignedOrder = order.order 
+      
+      socket.on('tripAssigned', function(trip) {
+					if (this.taxiId == trip.taxi.taxiId){
+							this.assignedTrip = trip;
+					}
       }.bind(this));
+
+			socket.on('customerResponse', function(trip) {
+					if (this.taxiId == trip.taxi.taxiId){
+							if (trip.customerAccept) {
+									this.currentState = 'pickup';
+							}
+							else {
+									this.currentState = 'assigning';
+									this.assignedTrip = null;
+							}
+					}
+      }.bind(this));
+      
     // this icon is not reactive
     this.taxiIcon = L.icon({
       iconUrl: "img/taxi.png",
@@ -104,16 +121,31 @@ var vm = new Vue({
       var destMarker = L.marker(order.destLatLong).addTo(this.map);
       destMarker.orderId = order.orderId;
       var connectMarkers = L.polyline([order.fromLatLong, order.destLatLong], {color: 'blue'}).addTo(this.map);
-      return {from: fromMarker, dest: destMarker, line: connectMarkers};
+				return {from: fromMarker, dest: destMarker, line: connectMarkers};
     },
+      
+      // Respond to a pending trip request, true or false
+      respondToTripRequest: function (response) {
+					this.assignedTrip.driverAccept = response;
+					socket.emit("driverResponse", this.assignedTrip);
+					
+					if (!response) {
+							this.assignedTrip = null;
+							this.currentStatus = 'assigning';
+					}
+      },
+      
       markAtCustomer: function () {
-	  socket.emit("driverWaiting", {order: this.assignedOrder});
+					socket.emit("driverWaiting", this.assignedTrip);
+					this.currentStatus = 'waiting';
       },
       markCustomerReady: function () {
-	  socket.emit("tripBegin", {order: this.assignedOrder});
+					socket.emit("tripBegin", this.assignedTrip);
+					this.currentStatus = 'driving';
       },
       markTripComplete: function () {
-	  socket.emit("tripCompleted", {order: this.assignedOrder});
+					socket.emit("tripCompleted", this.assignedTrip);
+					this.currentStatus = 'inactive';
       }
   }
 });

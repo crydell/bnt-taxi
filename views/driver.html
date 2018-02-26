@@ -28,10 +28,14 @@
         <button v-on:click="acceptOrder(order)">ACCEPT</button><button v-on:click="finishOrder(order.orderId)">FINISH</button>
       </div>
     </ul>
-    
+
     <button v-on:click="markAtCustomer">Mark that you're at the customer</button>
     <button v-on:click="markCustomerReady">Mark that the customer is in and you have begun driving them</button>
     <button v-on:click="markTripComplete">Mark that the trip is complete</button>
+		<div v-if="assignedTrip != null">
+			<button v-on:click="respondToTripRequest(true)">Accept trip</button>
+			<button v-on:click="respondToTripRequest(false)">Decline trip</button>
+		</div>
     <button v-on:click="quit">Quit</button>
   </div>
 </body>

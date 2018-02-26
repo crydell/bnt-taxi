@@ -5,30 +5,32 @@
 var socket = io();
 
 var vm = new Vue({
-  el: '#page',
+		el: '#page',
     data: {
-	selectedOrder: null,
-	selectedTaxi: null,
-	currentAssignmentMenu: "orders",
-	orders: {},
-	taxis: {},
-	customerMarkers: {},
-	taxiMarkers: {}
+				selectedOrder: null,
+				selectedTaxi: null,
+				currentAssignmentMenu: "orders",
+				orders: {},
+				taxis: {},
+				trips: {},
+				customerMarkers: {},
+				taxiMarkers: {}
     },
 
   created: function () {
-    socket.on('initialize', function (data) {
-      this.orders = data.orders;
-      this.taxis = data.taxis;
-      // add markers in the map for all orders
-      for (var orderId in data.orders) {
-        this.customerMarkers[orderId] = this.putCustomerMarkers(data.orders[orderId]);
-      }
-      // add taxi markers in the map for all taxis
-      for (var taxiId in data.taxis) {
-        this.taxiMarkers[taxiId] = this.putTaxiMarker(data.taxis[taxiId]);
-      }
-    }.bind(this));
+			socket.on('initialize', function (data) {
+					this.orders = data.orders;
+					this.taxis = data.taxis;
+					this.trips = data.trips;
+					// add markers in the map for all orders
+					for (var orderId in data.orders) {
+							this.customerMarkers[orderId] = this.putCustomerMarkers(data.orders[orderId]);
+					}
+					// add taxi markers in the map for all taxis
+					for (var taxiId in data.taxis) {
+							this.taxiMarkers[taxiId] = this.putTaxiMarker(data.taxis[taxiId]);
+					}
+			}.bind(this));
 
     socket.on('taxiAdded', function (taxi) {
       this.$set(this.taxis, taxi.taxiId, taxi);
@@ -60,6 +62,12 @@ var vm = new Vue({
       this.map.removeLayer(this.customerMarkers[orderId].line);
       Vue.delete(this.customerMarkers, orderId);
     }.bind(this));
+
+			socket.on('currentTrips', function (currentTrips) {
+					console.log(currentTrips.trips);
+					this.trips = currentTrips.trips;
+			}.bind(this));
+
 
     // These icons are not reactive
     this.taxiIcon = L.icon({
@@ -119,8 +127,55 @@ var vm = new Vue({
       var connectMarkers = L.polyline([order.fromLatLong, order.destLatLong], {color: 'blue'}).addTo(this.map);
       return {from: fromMarker, dest: destMarker, line: connectMarkers};
     },
-    assignTaxi: function (order) {
-	socket.emit("tripAssigned", {order: order.orderId});
-    }
+      
+      assignTaxi: function (order, taxi) {
+					socket.emit("tripAssigned", {
+							order: order,
+				      taxi: taxi,
+				      driverAccept: false,
+				      customerAccept: false});
+			},
+
+			orderIsPending: function(order) {
+					for (var trip in this.trips) {
+							if (this.trips[trip].order.orderId == order.orderId
+									&& !this.trips[trip].customerAccept){
+									return true;
+							}
+					}
+							
+					return false;
+			},
+
+			taxiIsPending: function(taxi) {
+					for (var trip in this.trips) {
+							if (trip.taxi.taxiId == taxi.taxiId && !trip.driverAccept){
+									return true;
+							}
+					}
+					
+					return false;
+			},
+
+			orderIsAssigned: function(order) {
+					for (var trip in this.trips) {
+							if (this.trips[trip].order.orderId == order.orderId
+									&& this.trips[trip].customerAccept){
+									return true;
+							}
+					}
+							
+					return false;
+			},
+
+			taxiIsAssigned: function(taxi) {
+					for (var trip in this.trips) {
+							if (trip.taxi.taxiId == taxi.taxiId && trip.driverAccept){
+									return true;
+							}
+					}
+					
+					return false;
+			}
   }
 });

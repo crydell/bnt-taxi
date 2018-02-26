@@ -15,7 +15,8 @@ var vm = new Vue({
     taxiMarkers: {},
       requestButton: false,
       showingMore: false,
-      currentState: 'ordering'
+      currentState: 'ordering',
+      assignedTrip: null
   },
   created: function () {
     socket.on('initialize', function (data) {
@@ -50,31 +51,39 @@ var vm = new Vue({
       Vue.delete(this.taxiMarkers, taxiId);
     }.bind(this));
 
-      
+			/*
       socket.on('tripAssigned', function (trip) {
-	  if (trip.order == this.orderId){
-	      this.currentState = 'waiting';
-	  }
+					if (trip.order == this.orderId){
+							this.currentState = 'waiting';
+					}
+      }.bind(this));
+*/
+
+      socket.on('driverResponse', function (trip) {
+					if (trip.order.orderId == this.orderId && trip.driverAccept){
+							this.assignedTrip = trip;
+							this.currentState = 'responding';
+					}
       }.bind(this));
 
       socket.on('driverWaiting', function (trip) {
-	  if (trip.order == this.orderId){
-	      this.currentState = 'arrived';
-	  }
+					if (trip.order.orderId == this.orderId){
+							this.currentState = 'arrived';
+					}
       }.bind(this));
 
       socket.on('tripBegin', function (trip) {
-	  if (trip.order == this.orderId){
-	      this.currentState = 'travelling';
-          this.map.removeLayer(this.fromMarker);
-	  }
+					if (trip.order.orderId == this.orderId){
+							this.currentState = 'travelling';
+							this.map.removeLayer(this.fromMarker);
+					}
       }.bind(this));
 
       socket.on('tripCompleted', function (trip) {
-	  if (trip.order == this.orderId){
-	      this.currentState = 'thanking';
-	      setTimeout(function(){this.currentState = 'ordering'; this.toggleSearch()}.bind(this), 5000);
-	  }
+					if (trip.order.orderId == this.orderId){
+							this.currentState = 'thanking';
+							setTimeout(function(){this.currentState = 'ordering'; this.toggleSearch()}.bind(this), 5000);
+					}
       }.bind(this));
       
 
@@ -291,6 +300,17 @@ var vm = new Vue({
     },
       addRequestButton: function (event) {
 	  this.requestButton = true;
-    }
+			},
+			respondToTripRequest: function (response) {
+					this.assignedTrip.customerAccept = response;
+					socket.emit("customerResponse", this.assignedTrip);
+					
+					if (!response) {
+							this.currentState = 'assigning';
+							this.assignedTrip = null;
+					} else {
+							this.currentState = 'waiting';
+					}
+			}
   }
 });

@@ -5,18 +5,72 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TAXI DRIVER</title>
   <link rel="stylesheet" href="leaflet/leaflet.css">
+  <link rel="stylesheet" href="/esri-leaflet-geocoder/esri-leaflet-geocoder.css">
   <link rel="stylesheet" href="css/taxi.css">
+  <link href="https://fonts.googleapis.com/css?family=Maven+Pro" rel="stylesheet">
   <script src="/vue/vue.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/leaflet/leaflet.js"></script>
   <script src="js/driver.js" defer></script>
+  <!--<script src="js/customer.js" defer></script>-->
 </head>
 <body>
   <div id="page">
-  	<h1>
-	    TAXI DRIVER # {{ taxiId }}
-	  </h1>
-    <div id="my-map" style="position: relative; height: 40em"></div>
+  	
+    <div id="my-map"></div>
+
+    <section id="driver-info">
+
+        <h1 align="center">
+            TAXI DRIVER # {{ taxiId }}
+        </h1>
+
+        <div class="loader"></div>
+        <div><h3>Waiting for customer...</h3></div>
+        
+        <div>
+            <button  @click="isAvailable = isAvailable" id="chat-button">
+            <h3>Chat</h3>
+            </button>
+        </div>
+      
+
+    </section>
+
+    <div id="overlay">
+      
+        <button  @click="isAvailable = !isAvailable; quit()" id="taxi-button1">
+            <h3>Mark as {{ isAvailable ? 'Unavailable' : 'Available' }}</h3>
+        </button>
+
+        <button v-show="isAvailable = isAvailable" @click="markAtCustomer" id="taxi-button1">
+            <h3>Arrived customer</h3>
+        </button>
+
+        <button v-show="isAvailable = isAvailable" @click="markCustomerReady(); testcall()" id="taxi-button1">
+            <h3>Begin drive</h3>
+        </button>
+
+        <button v-show="isAvailable = isAvailable" @click="markTripComplete" id="taxi-button1">
+            <h3>Complete Trip</h3>
+        </button>
+        
+        
+      <!--  <button v-show="currentState == 'ordering'" v-on:click="markAtCustomer" id="show-more">Mark that you're at the customer</button>
+       <button v-on:click="markCustomerReady">Mark that the customer is in and you have begun driving them</button>
+        <button v-on:click="markTripComplete">Mark that the trip is complete</button>
+        <button v-on:click="quit">Quit</button> -->
+    </div>
+
+    <section id="driver-info">
+
+
+      <!--<div id="show-more">
+          
+        
+      </div>-->
+
+    </section>
     <ul>
       <div v-for="order in orders" v-if="order.taxiId == taxiId">
         # {{ order.orderId}} From: {{ order.fromLatLong[0].toFixed(3) }}, {{ order.fromLatLong[1].toFixed(3) }} Destination: {{ order.destLatLong[0].toFixed(3) }}, {{ order.destLatLong[1].toFixed(3) }}
@@ -29,10 +83,10 @@
       </div>
     </ul>
     
-    <button v-on:click="markAtCustomer">Mark that you're at the customer</button>
+    <!--<button v-on:click="markAtCustomer">Mark that you're at the customer</button>
     <button v-on:click="markCustomerReady">Mark that the customer is in and you have begun driving them</button>
     <button v-on:click="markTripComplete">Mark that the trip is complete</button>
-    <button v-on:click="quit">Quit</button>
+    <button v-on:click="quit">Quit</button>-->
   </div>
 </body>
 </html>

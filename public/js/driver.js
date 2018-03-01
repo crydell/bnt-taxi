@@ -7,17 +7,24 @@ var socket = io();
 var vm = new Vue({
   el: '#page',
   data: {
-    map: null,
-    taxiId: 0,
-    taxiLocation: null,
-    orders: {},
-      customerMarkers: {},
-      assignedOrder: 0
+  map: null,
+  taxiId: 0,
+  taxiLocation: null,
+  orders: {},
+  customerMarkers: {},
+  isAvailable: true,
+  taxiStatus: 'online',
+  assignedOrder: 0
   },
   created: function () {
     socket.on('initialize', function (data) {
       this.orders = data.orders;
+    
+      for(var orderId in data.orders) {
+        this.customerMarkers[orderId] = this.putCustomerLocation(data.orders[orderId]);
+      }
     }.bind(this));
+
     socket.on('currentQueue', function (data) {
       this.orders = data.orders;
     }.bind(this));
@@ -48,6 +55,7 @@ var vm = new Vue({
   mounted: function () {
     // set up the map
     this.map = L.map('my-map').setView([59.8415,17.648], 13);
+    this.map.removeControl(this.map.zoomControl);
 
     // create the tile layer with correct attribution
     var osmUrl='http://{s}.tile.osm.org/{z}/{x}/{y}.png';
@@ -74,6 +82,17 @@ var vm = new Vue({
         this.taxiLocation.setLatLng(event.latlng);
         this.moveTaxi(event);
       }
+    },
+
+    putCustomerLocation: function (order){
+      var fromMarker = L.marker(order.fromLatLong, {icon: this.fromIcon}).addTo(this.map);
+      fromMarker.bindPopup(this.createPopup(order.orderId, order.orderItems));
+      fromMarker.orderId = order.orderId;
+      var destMarker = L.marker(order.destLatLong).addTo(this.map);
+      destMarker.bindPopup(this.createPopup(order.orderId, order.orderItems));
+      destMarker.orderId = order.orderId;
+      
+
     },
     moveTaxi: function (event) {
       socket.emit("moveTaxi", { taxiId: this.taxiId,
@@ -114,6 +133,9 @@ var vm = new Vue({
       },
       markTripComplete: function () {
 	  socket.emit("tripCompleted", {order: this.assignedOrder});
+      },
+      testcall: function () {
+    console.log("hej TEST");
       }
   }
 });

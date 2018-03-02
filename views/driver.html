@@ -48,6 +48,19 @@
         <button  @click="isAvailable = isAvailable" id="chat-button">
           <h3>Chat</h3>
         </button>
+
+	<!-- TODO: Make chat look nice -->
+	<div>
+	  <p v-for="message in chatLog">
+	    {{message.timeSent}} {{message.sender}}:
+	    {{message.message}}
+	  </p>
+	  
+	  <form action="#">
+	    <input type="text" autocomplete="off" id="messageField">
+	    <input value="Send message" v-on:click="sendChatMessage"/>
+	  </form>
+	</div>
       </div>
     </section>
 

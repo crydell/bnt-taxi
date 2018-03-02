@@ -12,6 +12,7 @@ var vm = new Vue({
 	taxi: {}, 
 	taxiLocation: null,
 	orders: {},
+	chatLog: {},
 	customerMarkers: {},
 	isAvailable: true,
       	assignedTrip: {},
@@ -46,6 +47,17 @@ var vm = new Vue({
 		  this.currentState = 'assigning';
 		  this.assignedTrip = null;
 	      }
+	  }
+      }.bind(this));
+
+
+      socket.on('chatMessageSent', function(message) {
+	  if (this.taxi.taxiId == message.taxi.taxiId){
+	      console.log('received');
+	      var tmp = this.chatLog;
+	      tmp[message.messageId] = message;
+	      this.chatLog = {}; // It works?
+	      this.chatLog = tmp;
 	  }
       }.bind(this));
 
@@ -158,7 +170,6 @@ var vm = new Vue({
 	  }
       },
       
-      // Respond to a pending trip request, true or false
       respondToTripRequest: function (response) {
 	  this.assignedTrip.driverAccept = response;
 	  socket.emit("driverResponse", this.assignedTrip);
@@ -170,6 +181,18 @@ var vm = new Vue({
 	  else {
 	      this.currentState = 'responded';
 	  }
+      },
+
+      sendChatMessage: function (msg) {
+	  socket.emit("chatMessageSent",
+		      {
+			  messageId: new Date(),
+			  sender: this.taxi.name,
+			  taxi: this.taxi,
+			  order: this.assignedTrip.order,
+			  message: document.getElementById('messageField').value,
+			  timeSent: formatTime(new Date())});
+	  document.getElementById('messageField').value = "";
       },
       
       markAtCustomer: function () {

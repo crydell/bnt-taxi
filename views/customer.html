@@ -64,6 +64,20 @@
 	</transition>
 	
 	<section v-show="currentState != 'ordering'" id="info">
+
+	  <!-- TODO: Make chat look nice -->
+	  <div v-show="currentState == 'waiting' || currentState == 'arrived'">
+	    <p v-for="message in chatLog">
+	      {{message.timeSent}} {{message.sender}}:
+	      {{message.message}}</p>
+	    
+	    <form action="#">
+	      <input type="text" autocomplete="off" id="messageField">
+	      <input value="Send message" v-on:click="sendChatMessage"/>
+	    </form>
+	  </div>
+
+	  
 	  <div v-show="currentState == 'assigning'">
 	    <img class="loading-icon" src="img/loading.png"></img>
 	    <p>Waiting for a driver to be dispatched...</p>

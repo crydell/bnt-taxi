@@ -183,6 +183,10 @@ io.on('connection', function (socket) {
     });
 
     
+    socket.on('chatMessageSent', function(message) {
+	io.emit('chatMessageSent', message );
+    });
+    
     socket.on('tripAssigned', function(trip) {
 	var tripId = data.addTrip(trip);
 	trip.tripId = tripId;

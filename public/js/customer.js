@@ -14,6 +14,7 @@ var vm = new Vue({
 	destMarker: null,
 	connectMarkers: null,
 	taxiMarkers: {},
+	chatLog: {},
 	requestButton: false,
 	showingMore: false,
 	currentState: 'ordering',
@@ -67,6 +68,16 @@ var vm = new Vue({
 		this.currentState = 'responding';
 	    }
 	}.bind(this));
+
+	socket.on('chatMessageSent', function(message) {
+	    if (this.orderId == message.order.orderId){
+		var tmp = this.chatLog;
+		tmp[message.messageId] = message;
+		this.chatLog = {};
+		this.chatLog = tmp;
+	    }
+	}.bind(this));
+
 
 	socket.on('driverWaiting', function (trip) {
 	    if (trip.order.orderId == this.orderId){
@@ -322,6 +333,17 @@ var vm = new Vue({
 	    } else {
 		this.currentState = 'waiting';
 	    }
+	},
+	sendChatMessage: function (msg) {
+	    socket.emit("chatMessageSent",
+			{
+			    messageId: new Date(),
+			    sender: this.name,
+			    taxi: this.assignedTrip.taxi,
+			    order: this.assignedTrip.order,
+			    message: document.getElementById('messageField').value,
+			    timeSent: formatTime(new Date())});
+	    document.getElementById('messageField').value = "";
 	}
     }
 });

@@ -5,18 +5,81 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TAXI DRIVER</title>
   <link rel="stylesheet" href="leaflet/leaflet.css">
+  <link rel="stylesheet" href="/esri-leaflet-geocoder/esri-leaflet-geocoder.css">
   <link rel="stylesheet" href="css/taxi.css">
+  <link href="https://fonts.googleapis.com/css?family=Maven+Pro" rel="stylesheet">
+  <script src="js/utils.js"></script>
   <script src="/vue/vue.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/leaflet/leaflet.js"></script>
   <script src="js/driver.js" defer></script>
+  <!--<script src="js/customer.js" defer></script>-->
 </head>
 <body>
   <div id="page">
-  	<h1>
-	    TAXI DRIVER # {{ taxiId }}
-	  </h1>
-    <div id="my-map" style="position: relative; height: 40em"></div>
+  	
+    <div id="my-map"></div>
+
+    <section id="driver-info">
+
+      <div v-show="currentState=='assigning'">
+        <h1 align="center">
+          TAXI DRIVER # {{ taxi.taxiId }} {{ taxi.name }}
+        </h1>
+
+        <div class="loader"></div>
+        <div><h3>Waiting for customer...</h3></div>
+      </div>
+
+      <div v-if="currentState=='responding'">
+	<h3>You've been assigned {{assignedTrip.order.name}}</h3>
+	<button v-on:click="respondToTripRequest(true)" class="accept-btn">Accept</button>
+	<button v-on:click="respondToTripRequest(false)" class="decline-btn">Decline</button>
+      </div>
+
+      <div v-if="currentState=='responded'">
+	<h3>Waiting for {{assignedTrip.order.name}} to accept...</h3>
+	  
+        <div class="loader"></div>
+      </div>
+
+      
+      <div v-show="currentState=='pickup' || currentState=='waiting'">
+        <button  @click="isAvailable = isAvailable" id="chat-button">
+          <h3>Chat</h3>
+        </button>
+      </div>
+    </section>
+
+    <div id="overlay">
+      
+        <button v-show="currentState=='inactive'||currentState=='assigning'" v-on:click="toggleAvailable" class="taxi-button1">
+            <h3>Mark as {{ currentState == 'assigning' ? 'Unavailable' : 'Available' }}</h3>
+        </button>
+
+        <button v-show="currentState=='pickup'" v-on:click="markAtCustomer" class="taxi-button1">
+            <h3>Arrived at customer</h3>
+        </button>
+
+        <button v-show="currentState=='waiting'" v-on:click="markCustomerReady" class="taxi-button1">
+            <h3>Customer is in</h3>
+        </button>
+
+        <button v-show="currentState=='driving'" v-on:click="markTripComplete" class="taxi-button1">
+            <h3>Complete Trip</h3>
+        </button>
+    </div>
+<!--
+    <section id="driver-info">
+
+
+      <div id="show-more">
+          
+        
+      </div>
+
+    </section>
+    -->
     <ul>
       <div v-for="order in orders" v-if="order.taxiId == taxiId">
         # {{ order.orderId}} From: {{ order.fromLatLong[0].toFixed(3) }}, {{ order.fromLatLong[1].toFixed(3) }} Destination: {{ order.destLatLong[0].toFixed(3) }}, {{ order.destLatLong[1].toFixed(3) }}
@@ -28,24 +91,10 @@
         <button v-on:click="acceptOrder(order)">ACCEPT</button><button v-on:click="finishOrder(order.orderId)">FINISH</button>
       </div>
     </ul>
-
-    <button v-show="currentState=='pickup'" v-on:click="markAtCustomer">
-      Mark that you're at the customer
-    </button>
-    
-    <button v-show="currentState=='waiting'" v-on:click="markCustomerReady">
-      Mark that the customer is in and you have begun driving them
-    </button>
-    
-    <button v-show="currentState=='driving'" v-on:click="markTripComplete">
-      Mark that the trip is complete
-    </button>
-    
-    <div v-show="currentState=='responding'">
-      <button v-on:click="respondToTripRequest(true)">Accept trip</button>
-      <button v-on:click="respondToTripRequest(false)">Decline trip</button>
-    </div>
-    <button v-on:click="quit">Quit</button>
+    <!--<button v-on:click="markAtCustomer">Mark that you're at the customer</button>
+    <button v-on:click="markCustomerReady">Mark that the customer is in and you have begun driving them</button>
+    <button v-on:click="markTripComplete">Mark that the trip is complete</button>
+    <button v-on:click="quit">Quit</button>-->
   </div>
 </body>
 </html>

@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="/esri-leaflet-geocoder/esri-leaflet-geocoder.css">
     <link rel="stylesheet" href="css/taxi.css">
     <link href="https://fonts.googleapis.com/css?family=Maven+Pro" rel="stylesheet">
+    <script src="js/utils.js"></script>
     <script src="/vue/vue.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <script src="/leaflet/leaflet.js"></script>
@@ -68,8 +69,8 @@
 	    <p>Waiting for a driver to be dispatched...</p>
 	  </div>
 
-	  <div v-show="currentState == 'responding'">
-	    <p>A driver has been assigned to you!</p>
+	  <div v-if="currentState == 'responding'">
+	    <p>{{assignedTrip.taxi.name}} has been assigned to you.</p>
 	    <button v-on:click="respondToTripRequest(true)" class="accept-btn">Accept</button>
 	    <button v-on:click="respondToTripRequest(false)" class="decline-btn">Decline</button>
 	  </div>

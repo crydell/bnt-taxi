@@ -7,6 +7,7 @@ var socket = io();
 var vm = new Vue({
     el: '#page',
     data: {
+	name: generateName(),
 	orderId: null,
 	map: null,
 	fromMarker: null,
@@ -257,11 +258,13 @@ var vm = new Vue({
 	    this.currentState = 'assigning';
 	    this.requestButton = false;
 	    this.toggleSearch();
-            socket.emit("orderTaxi", { fromLatLong: [this.fromMarker.getLatLng().lat, this.fromMarker.getLatLng().lng],
-                                       destLatLong: [this.destMarker.getLatLng().lat, this.destMarker.getLatLng().lng],
-                                       orderItems: this.getOrderItems(),
-				       timeJoined: new Date().getTime()
-                                     });
+            socket.emit("orderTaxi", {
+		name: this.name,
+		fromLatLong: [this.fromMarker.getLatLng().lat, this.fromMarker.getLatLng().lng],
+                destLatLong: [this.destMarker.getLatLng().lat, this.destMarker.getLatLng().lng],
+                orderItems: this.getOrderItems(),
+		timeJoined: new Date().getTime()
+            });
 	},
 	toggleSearch: function() {
 	    var search = document.getElementById('map-search-area');

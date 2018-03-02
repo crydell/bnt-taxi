@@ -104,12 +104,45 @@
 
 	  <div v-show="currentState == 'rating'">
 	    <p>Would you like to rate your driver?</p>
-	    <button v-on:click="giveRating(0)"><h3>Not this time</h3></button>
+			<form class="rating">
+				<label>
+					<input @click="giveRating(1)" type="radio" name="stars" value="1" />
+					<span class="icon">★</span>
+				</label>
+				<label>
+					<input @click="giveRating(2)" type="radio" name="stars" value="2" />
+					<span class="icon">★</span>
+					<span class="icon">★</span>
+				</label>
+				<label>
+					<input @click="giveRating(3)" type="radio" name="stars" value="3" />
+					<span class="icon">★</span>
+					<span class="icon">★</span>
+					<span class="icon">★</span>   
+				</label>
+				<label>
+					<input @click="giveRating(4)" type="radio" name="stars" value="4" />
+					<span class="icon">★</span>
+					<span class="icon">★</span>
+					<span class="icon">★</span>
+					<span class="icon">★</span>
+				</label>
+				<label>
+					<input @click="giveRating(5)"type="radio" name="stars" value="5" />
+					<span class="icon">★</span>
+					<span class="icon">★</span>
+					<span class="icon">★</span>
+					<span class="icon">★</span>
+					<span class="icon">★</span>
+				</label>
+			</form>
+			
+			<!--<button v-on:click="giveRating(0)"><h3>Not this time</h3></button>
 	    <button v-on:click="giveRating(1)"><h3>1 star</h3></button>
 	    <button v-on:click="giveRating(2)"><h3>2 stars</h3></button>
 	    <button v-on:click="giveRating(3)"><h3>3 stars</h3></button>
 	    <button v-on:click="giveRating(4)"><h3>4 stars</h3></button>
-	    <button v-on:click="giveRating(5)"><h3>5 stars</h3></button>
+	    <button v-on:click="giveRating(5)"><h3>5 stars</h3></button>-->
 	  </div>
 
 	  <div v-show="currentState == 'thanking'">

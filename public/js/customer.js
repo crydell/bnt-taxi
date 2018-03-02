@@ -8,6 +8,7 @@ var vm = new Vue({
     el: '#page',
     data: {
 	name: generateName(),
+	customerId: null,
 	orderId: null,
 	map: null,
 	fromMarker: null,
@@ -119,6 +120,15 @@ var vm = new Vue({
             iconSize: [36,50],
             iconAnchor: [19,50]
         });
+
+	
+	//Helper function, should probably not be here
+	function getRandomInt(min, max) {
+	    min = Math.ceil(min);
+	    max = Math.floor(max);
+	    return Math.floor(Math.random() * (max - min)) + min;
+	}
+	this.customerId = this.taxi.taxiId = getRandomInt(1, 1000000);
     },
     mounted: function () {
 	// set up the map
@@ -271,6 +281,7 @@ var vm = new Vue({
 	    this.toggleSearch();
             socket.emit("orderTaxi", {
 		name: this.name,
+		customerId: this.customerId,
 		fromLatLong: [this.fromMarker.getLatLng().lat, this.fromMarker.getLatLng().lng],
                 destLatLong: [this.destMarker.getLatLng().lat, this.destMarker.getLatLng().lng],
                 orderItems: this.getOrderItems(),

@@ -63,6 +63,7 @@
 		  {{order.destLatLong[1].toFixed(3)}}
 		</span>
 	      </h3>
+	      <p>Rating: {{order.rating.rating}}</p>
 	      <p>Customer: {{order.name}}</p>
 	      <p>Has been waiting for
 		{{ Math.round((((new Date() - order.timeJoined) % 86400000) % 3600000) / 60000) }}

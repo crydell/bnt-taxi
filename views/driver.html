@@ -58,7 +58,7 @@
 	  
 	  <form action="#">
 	    <input type="text" autocomplete="off" id="messageField">
-	    <input value="Send message" v-on:click="sendChatMessage"/>
+	    <input type="submit" value="Send message" v-on:click="sendChatMessage"/>
 	  </form>
 	</div>
       </div>
@@ -81,6 +81,15 @@
         <button v-show="currentState=='driving'" v-on:click="markTripComplete" class="taxi-button1">
             <h3>Complete Trip</h3>
         </button>
+
+	<div v-if="currentState=='rating'">
+	  <p>How was your passenger?</p>
+	  <button class="taxi-button1" v-on:click="giveRating(1)"><h3>1 star</h3></button>
+	  <button class="taxi-button1" v-on:click="giveRating(2)"><h3>2 stars</h3></button>
+	  <button class="taxi-button1" v-on:click="giveRating(3)"><h3>3 stars</h3></button>
+	  <button class="taxi-button1" v-on:click="giveRating(4)"><h3>4 stars</h3></button>
+	  <button class="taxi-button1" v-on:click="giveRating(5)"><h3>5 stars</h3></button>
+	</div>
     </div>
 <!--
     <section id="driver-info">

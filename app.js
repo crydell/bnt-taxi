@@ -44,6 +44,8 @@ function Data() {
     this.trips = {};
     this.currentOrderNumber = 1000;
     this.currentTripNumber = 1000;
+    this.customerRatings = {};
+    this.driverRatings = {};
 }
 
 
@@ -58,6 +60,7 @@ Data.prototype.getOrderNumber = function () {
 Data.prototype.addOrder = function (order) {
     var orderId = this.getOrderNumber();
     //Store the order in an "associative array" with orderId as key
+    order.rating = data.customerRatings[order.customerId] == undefined ? 0 : data.customerRatings[order.customerId];
     this.orders[orderId] = order;
     return orderId;
 };
@@ -84,6 +87,7 @@ Data.prototype.getAllOrders = function () {
 
 Data.prototype.addTaxi = function (taxi) {
     //Store the order in an "associative array" with orderId as key
+    taxi.rating = data.driverRatings[taxi.taxiId] == undefined ? 0 : data.driverRatings[taxi.taxiId];
     this.taxis[taxi.taxiId] = taxi;
 };
 
@@ -132,6 +136,30 @@ Data.prototype.updateTripDetails = function (trip) {
 
 Data.prototype.getAllTrips = function () {
     return this.trips;
+};
+
+Data.prototype.updateCustomerRating = function (rating) {
+    if (this.customerRatings[rating.customerId] == undefined) {
+	this.customerRatings[rating.customerId] = {rating: rating.rating, amount: 1};
+    }
+    else {
+	var oldRating = this.customerRatings[rating.customerId].rating;
+	var oldAmount = this.customerRatings[rating.customerId].amount;
+	this.customerRatings[rating.customerId].amount = oldAmount + 1;
+	this.customerRatings[rating.customerId].rating = ((oldRating * oldAmount) + rating.rating) / (oldAmount + 1);
+    }
+};
+
+Data.prototype.updateDriverRating = function (rating) {
+    if (this.driverRatings[rating.taxiId] == undefined) {
+	this.driverRatings[rating.taxiId] = {rating: rating.rating, amount: 1};
+    }
+    else {
+	var oldRating = this.driverRatings[rating.taxiId].rating;
+	var oldAmount = this.driverRatings[rating.taxiId].amount;
+	this.driverRatings[rating.taxiId].amount = oldAmount + 1;
+	this.driverRatings[rating.taxiId].rating = ((oldRating * oldAmount) + rating.rating) / (oldAmount + 1);
+    }
 };
 
 var data = new Data();
@@ -218,6 +246,16 @@ io.on('connection', function (socket) {
 
     socket.on('tripBegin', function(trip) {
 	io.emit('tripBegin', trip);
+    });
+
+    socket.on('giveRating', function(rating){
+	if (rating.forCustomer){
+	    data.updateCustomerRating(rating);
+	}
+	else {
+	    data.updateDriverRating(rating);
+	}
+	
     });
 
     socket.on('tripCompleted', function(trip) {

@@ -204,9 +204,17 @@ var vm = new Vue({
 	  this.currentState = 'driving';
       },
       markTripComplete: function () {
+	  this.lastCustomer = this.assignedTrip.order.customerId;
 	  socket.emit("tripCompleted", this.assignedTrip);
-	  this.currentState = 'inactive';
+	  this.currentState = 'rating';
 	  this.quit();
       },
+      giveRating: function (rating) {
+	  socket.emit("giveRating",
+		      {forCustomer: true,
+		       customerId: this.lastCustomer,
+		       rating: rating});
+	  this.currentState = 'inactive';
+      }
   }
 });

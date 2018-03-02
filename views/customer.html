@@ -65,18 +65,26 @@
 	
 	<section v-show="currentState != 'ordering'" id="info">
 
-	  <!-- TODO: Make chat look nice -->
-	  <div v-show="currentState == 'waiting' || currentState == 'arrived'">
-	    <p v-for="message in chatLog">
-	      {{message.timeSent}} {{message.sender}}:
-	      {{message.message}}</p>
-	    
-	    <form action="#" onsubmit="return false">
-	      <input type="text" autocomplete="off" id="messageField">
-	      <input type="submit" value="Send message" v-on:click="sendChatMessage"/>
-	    </form>
-	  </div>
-
+		<!-- TODO: Make chat look nice -->
+		
+		<div class="chat-box">
+			<div class="open">Open
+			<div class="box">
+				<br>
+				<div v-show="currentState == 'waiting' || currentState == 'arrived'">
+						<p v-for="message in chatLog">
+							{{message.timeSent}} {{message.sender}}:
+							{{message.message}}</p>
+						
+						<form action="#" onsubmit="return false">
+							<input type="text" autocomplete="off" id="messageField">
+							<input type="submit" value="Send message" v-on:click="sendChatMessage"/>
+						</form>
+					</div>
+				<br>
+			</div>
+				<div>
+		<div>
 	  
 	  <div v-show="currentState == 'assigning'">
 	    <img class="loading-icon" src="img/loading.png"></img>

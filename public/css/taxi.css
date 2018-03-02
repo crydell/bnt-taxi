@@ -336,6 +336,30 @@ html {
     text-shadow: 0 0 5px #17d;
   }
 
+  .chat-box{
+    position: fixed;
+    bottom: 0;
+    right: 0;
+}
+  .box{
+    transition: height .6s ease-out;
+    width: 300px;
+    height: 0px;
+    background: rgb(255, 255, 255);
+    z-index: 9999;
+}
+  .open:hover>.box{
+    height:400px;
+    transition: height .6s ease-out;
+}
+  .open {
+    text-align: center;
+    font-size: 20px;
+    border: 2px solid #17d;;
+    background: #17d;;
+    color: #000000;
+}
+
 @keyframes spin {
     from {transform: rotate(0deg);}
     to {transform: rotate(360deg);}

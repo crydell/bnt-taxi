@@ -32,7 +32,7 @@
       </div>
 
       <div v-if="currentState=='responding'">
-	<h3>You've been assigned {{assignedTrip.order.name}}</h3>
+	<h3>You've been assigned {{assignedTrip.order.name}} with a rating of {{assignedTrip.order.rating}}</h3>
 	<button v-on:click="respondToTripRequest(true)" class="accept-btn">Accept</button>
 	<button v-on:click="respondToTripRequest(false)" class="decline-btn">Decline</button>
       </div>
@@ -56,7 +56,7 @@
 	    {{message.message}}
 	  </p>
 	  
-	  <form action="#">
+	  <form action="#" onsubmit="return false">
 	    <input type="text" autocomplete="off" id="messageField">
 	    <input type="submit" value="Send message" v-on:click="sendChatMessage"/>
 	  </form>

@@ -71,7 +71,7 @@
 	      {{message.timeSent}} {{message.sender}}:
 	      {{message.message}}</p>
 	    
-	    <form action="#">
+	    <form action="#" onsubmit="return false">
 	      <input type="text" autocomplete="off" id="messageField">
 	      <input type="submit" value="Send message" v-on:click="sendChatMessage"/>
 	    </form>
@@ -84,7 +84,7 @@
 	  </div>
 
 	  <div v-if="currentState == 'responding'">
-	    <p>{{assignedTrip.taxi.name}} has been assigned to you.</p>
+	    <p>{{assignedTrip.taxi.name}} with a rating of {{assignedTrip.taxi.rating}} has been assigned to you.</p>
 	    <button v-on:click="respondToTripRequest(true)" class="accept-btn">Accept</button>
 	    <button v-on:click="respondToTripRequest(false)" class="decline-btn">Decline</button>
 	  </div>
@@ -100,6 +100,16 @@
 
 	  <div v-show="currentState == 'travelling'">
 	    <p>You're on your way! Sit back and relax.</p>
+	  </div>
+
+	  <div v-show="currentState == 'rating'">
+	    <p>Would you like to rate your driver?</p>
+	    <button v-on:click="giveRating(0)"><h3>Not this time</h3></button>
+	    <button v-on:click="giveRating(1)"><h3>1 star</h3></button>
+	    <button v-on:click="giveRating(2)"><h3>2 stars</h3></button>
+	    <button v-on:click="giveRating(3)"><h3>3 stars</h3></button>
+	    <button v-on:click="giveRating(4)"><h3>4 stars</h3></button>
+	    <button v-on:click="giveRating(5)"><h3>5 stars</h3></button>
 	  </div>
 
 	  <div v-show="currentState == 'thanking'">

@@ -60,7 +60,8 @@ Data.prototype.getOrderNumber = function () {
 Data.prototype.addOrder = function (order) {
     var orderId = this.getOrderNumber();
     //Store the order in an "associative array" with orderId as key
-    order.rating = data.customerRatings[order.customerId] == undefined ? 0 : data.customerRatings[order.customerId];
+    order.rating = data.customerRatings[order.customerId] == undefined ? 0 : data.customerRatings[order.customerId].rating;
+    order.rating = Math.round(order.rating * 10) / 10;
     this.orders[orderId] = order;
     return orderId;
 };
@@ -87,7 +88,8 @@ Data.prototype.getAllOrders = function () {
 
 Data.prototype.addTaxi = function (taxi) {
     //Store the order in an "associative array" with orderId as key
-    taxi.rating = data.driverRatings[taxi.taxiId] == undefined ? 0 : data.driverRatings[taxi.taxiId];
+    taxi.rating = data.driverRatings[taxi.taxiId] == undefined ? 0 : data.driverRatings[taxi.taxiId].rating;
+    taxi.rating = Math.round(taxi.rating * 10) / 10;
     this.taxis[taxi.taxiId] = taxi;
 };
 

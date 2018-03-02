@@ -19,7 +19,8 @@ var vm = new Vue({
 	requestButton: false,
 	showingMore: false,
 	currentState: 'ordering',
-	assignedTrip: null
+	assignedTrip: null,
+	lastDriver: null
     },
     created: function () {
 	socket.on('initialize', function (data) {
@@ -95,15 +96,17 @@ var vm = new Vue({
 
 	socket.on('tripCompleted', function (trip) {
 	    if (trip.order.orderId == this.orderId){
-		this.currentState = 'thanking';
-		setTimeout(function(){this.currentState = 'ordering'; this.toggleSearch()}.bind(this), 5000);
+		this.currentState = 'rating';
+
+		this.chatLog = {};
+		this.lastDriver = trip.taxi.taxiId;
+		
+		this.map.removeLayer(this.destMarker);
+		this.destMarker = null;
+		
+		this.map.removeLayer(this.connectMarkers);
+		this.connectMarkers = null;
 	    }
-	    
-	    this.map.removeLayer(this.destMarker);
-            this.destMarker = null;
-            
-	    this.map.removeLayer(this.connectMarkers);
-            this.connectMarkers = null;
 	}.bind(this));
 	
 
@@ -128,7 +131,7 @@ var vm = new Vue({
 	    max = Math.floor(max);
 	    return Math.floor(Math.random() * (max - min)) + min;
 	}
-	this.customerId = this.taxi.taxiId = getRandomInt(1, 1000000);
+	this.customerId = getRandomInt(1, 1000000);
     },
     mounted: function () {
 	// set up the map
@@ -355,6 +358,17 @@ var vm = new Vue({
 			    message: document.getElementById('messageField').value,
 			    timeSent: formatTime(new Date())});
 	    document.getElementById('messageField').value = "";
+	},
+	giveRating: function (rating) {
+	    if (rating != 0){
+		socket.emit("giveRating",
+			    {forCustomer: false,
+			     taxiId: this.lastDriver,
+			     rating: rating});
+	    }
+	    this.currentState = 'thanking';
+	    setTimeout(function(){this.currentState = 'ordering'; this.toggleSearch()}.bind(this), 5000);
 	}
+
     }
 });

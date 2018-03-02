@@ -207,6 +207,7 @@ var vm = new Vue({
 	  this.lastCustomer = this.assignedTrip.order.customerId;
 	  socket.emit("tripCompleted", this.assignedTrip);
 	  this.currentState = 'rating';
+	  this.chatLog = {};
 	  this.quit();
       },
       giveRating: function (rating) {

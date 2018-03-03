@@ -89,7 +89,7 @@ Assignment menu
 nav ul {
     padding: 0;
     margin: 0;
-    border-bottom: 4px solid #ccc;
+    border-bottom: 4px solid #39f;
 }
 
 nav li {
@@ -97,14 +97,14 @@ nav li {
     padding: 1em 2em;
     margin: 0 0.2em 0 0;
     display: inline-block;
-    background-color: #bbb;
+    background-color: #8cf;
     cursor: pointer;
     text-align: center;
     color: #fff;
 }
 
 nav li:hover, nav li.selected {
-    background-color: #ccc;
+    background-color: #39f;
 }
 
 
@@ -120,12 +120,30 @@ nav li:hover, nav li.selected {
 }
 
 .assignment-list-item {
+    display: flex;
     overflow: auto;
-    background-color: #ccc;
-    border-bottom: 1px solid #bbb;
-    padding: 1em 2em;
+    border-bottom: 2px solid #39f;
+    padding: 0;
+    margin: 0.5em 0 0 0;
     list-style-type: none;
     cursor: pointer;
+}
+
+.assignment-list-item .timer {
+    padding: 2em;
+    color: #fff;
+    background-color: #39f;
+    text-align: center;
+    width: 5em;
+}
+
+.assignment-list-item .description {
+    padding: 1em;
+    flex-grow: 1;
+}
+
+.assignment-list-item h2 {
+    margin: 0 0 1em 0;
 }
 
 .assignment-list-item h3 {
@@ -134,8 +152,9 @@ nav li:hover, nav li.selected {
     margin: 0;
 }
 
-.assignment-list-item:hover, .assignment-list-item.selected {
-    background-color: #ddd;
+.assignment-list-item.selected .description, .assignment-list-item:hover .description {
+    background-color: #39f;
+    color: #fff;
 }
 
 .assignment-list .from {
@@ -152,10 +171,20 @@ nav li:hover, nav li.selected {
 }
 
 .assignment-selection > li {
-    border-bottom: 1px solid #ddd;
+    border-left: 4px solid #39f;
     background-color: #eee;
     cursor: pointer;
     list-style-type: none;
+    margin: 0 0 1em 0;
+    padding: 1em;
+}
+
+.assignment-selection > li h3 {
+    margin: 0 0 0.5em 0;
+}
+
+.assignment-selection > li p {
+    margin: 0.5em 0 0 0;
 }
 
 .assignment-selection > li:hover {

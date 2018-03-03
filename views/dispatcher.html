@@ -51,36 +51,38 @@
 	    <li class="assignment-list-item"
 		v-on:click="selectedOrder = (selectedOrder != order) ? order : null"
 		v-bind:class="{selected: selectedOrder == order}">
-	      <h3>
-		<span class="from">
-		  Going from
-		  {{order.fromLatLong[0].toFixed(3)}},
-		  {{order.fromLatLong[1].toFixed(3)}}
-		</span>
-		<span class="to">
-		  Going to
-		  {{order.destLatLong[0].toFixed(3)}},
-		  {{order.destLatLong[1].toFixed(3)}}
-		</span>
-	      </h3>
-	      <p>Rating: {{order.rating}}</p>
-	      <p>Customer: {{order.name}}</p>
-	      <p>Has been waiting for
-		{{ Math.round((((new Date() - order.timeJoined) % 86400000) % 3600000) / 60000) }}
-		minutes</p>
-	      <p v-show="orderIsPending(order)">Waiting for both parties to accept</p>
+	      <div class="timer">
+		<h2>{{Math.round((((new Date() - order.timeJoined) % 86400000) % 3600000) / 60000)}} min</h2>
+	      </div>
 
-	      <ul>
-		<li v-for="(item, key) in order.orderItems">
-		  {{ key + ": " + item }}
-		</li>
-	      </ul>
-	      
+	      <div class="description">
+		<h2><span class="from">{{order.name}}</span>&nbsp;
+		  <span class="to">{{order.rating}} stars</span></h2>
+		<h3>
+		  <span class="from">
+		    Going from
+		    {{order.fromLatLong[0].toFixed(3)}},
+		    {{order.fromLatLong[1].toFixed(3)}}
+		  </span>
+		  <span class="to">
+		    Going to
+		    {{order.destLatLong[0].toFixed(3)}},
+		    {{order.destLatLong[1].toFixed(3)}}
+		  </span>
+		</h3>
+		<p v-show="orderIsPending(order)">Waiting for both parties to accept</p>
+
+		<ul>
+		  <li v-for="(item, key) in order.orderItems">
+		    {{ key + ": " + item }}
+		  </li>
+		</ul>
+	      </div>
 	    </li>
 	    <ul v-if="order == selectedOrder" class="assignment-selection">
 	      <li v-for="taxi in taxis" v-on:click="assignTaxi(order, taxi)">
-		Taxi ID: #{{taxi.taxiId}}
-		Current position: {{ taxi.latLong[0].toFixed(3) }}, {{ taxi.latLong[1].toFixed(3) }}
+		<h3>{{taxi.name}}&nbsp;{{taxi.rating}} stars</h3>
+		<p>Current distance: {{ taxi.latLong[0].toFixed(3) }}, {{ taxi.latLong[1].toFixed(3) }}</p>
 	      </li>
 	    </ul>
 	  </div>

@@ -210,6 +210,24 @@ var vm = new Vue({
 	    }
 	    
 	    return false;
+	},
+
+	kilometerDistance: function(lat1, long1, lat2, long2) {
+	    lat1 = Math.PI * lat1 / 180;
+	    lat2 = Math.PI * lat2 / 180;
+	    long1 = Math.PI * long1 / 180;
+	    long2 = Math.PI * long2 / 180;
+	    var angle = Math.acos(
+		(Math.sin(lat1) * Math.sin(lat2)) +
+		    (Math.cos(lat1) * Math.cos(lat2) * Math.cos(Math.abs(long1 - long2))));
+	    var distance = 6371 * angle;
+	    return distance;
+	},
+
+	minutesSince: function(time) {
+	    var currentTime = new Date();
+	    var msSince = currentTime - time;
+	    return Math.round(msSince/1000/60);
 	}
     }
 });

@@ -62,7 +62,7 @@
 	      </div>
 
 	      <div class="description">
-		<h2><span class="from">{{order.name}}</span>&nbsp;
+		<h2><span class="from">{{order.name}} #{{order.orderId}}</span>&nbsp;
 		  <span class="to"><span v-for="n in Math.round(order.rating)" class="icon">★</span></span></h2>
 		<h3>
 		  <span class="from">
@@ -86,7 +86,7 @@
 	    </li>
 	    <ul v-if="order == selectedOrder && !orderIsPending(order)" class="assignment-selection">
 	      <li v-for="taxi in taxis" v-if="!taxiIsPending(taxi) && !taxiIsAssigned(taxi)" v-on:click="assignTaxi(order, taxi)">
-		<h3>{{taxi.name}}
+		<h3>{{taxi.name}} #{{taxi.taxiId}}
 		  <span style="width: 1em; display: inline-block;">&nbsp;</span>
 		  <span v-for="n in Math.round(taxi.rating)" class="icon">★</span>
 		</h3>
@@ -138,7 +138,7 @@
 	    
 	    <ul v-if="taxi == selectedTaxi && !taxiIsPending(taxi)" class="assignment-selection">
 	      <li v-for="order in orders" v-if="!orderIsPending(order) && !orderIsAssigned(order)" v-on:click="assignTaxi(order, taxi)">
-		<h3>{{order.name}}
+		<h3>{{order.name}} #{{order.orderId}}
 		  <span style="width: 1em; display: inline-block;">&nbsp;</span>
 		  <span v-for="n in Math.round(order.rating)" class="icon">★</span>
 		</h3>

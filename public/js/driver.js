@@ -69,6 +69,8 @@ var vm = new Vue({
 	      && this.assignedTrip.tripId == cancellation.trip.tripId){
 	      this.currentState = 'cancelled';
 	      this.assignedTrip = {};
+	      this.map.removeLayer(this.currentDestination);
+	      this.map.removeLayer(this.currentDestLine);
 	      setTimeout(function(){this.currentState = 'assigning'; }.bind(this), 5000);
 	  }
       }.bind(this));

@@ -260,6 +260,17 @@ io.on('connection', function (socket) {
 	
     });
 
+    socket.on('tripCancelled', function(cancellation) {
+	if (cancellation.assigned){
+	    data.finishTrip(cancellation.trip.tripId);
+	    io.emit('currentTrips', { trips: data.getAllTrips()});
+	    io.emit('tripCancelled', cancellation);
+	}
+
+	data.finishOrder(cancellation.orderId);
+	io.emit('orderFinished', cancellation.orderId);
+    });
+    
     socket.on('tripCompleted', function(trip) {
 	data.finishTrip(trip.tripId);
 	data.finishOrder(trip.order.orderId);

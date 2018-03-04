@@ -43,6 +43,11 @@
         <div class="loader"></div>
       </div>
 
+      <div v-if="currentState=='cancelled'">
+	<h1 align="center">The order has been cancelled</h1>
+	<h3>Resuming search...</h3>
+      </div>
+
       
       <div v-show="currentState=='pickup' || currentState=='waiting'">
         <button  @click="isAvailable = isAvailable" id="chat-button">

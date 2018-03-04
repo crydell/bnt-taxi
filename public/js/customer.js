@@ -19,7 +19,7 @@ var vm = new Vue({
 	requestButton: false,
 	showingMore: false,
 	currentState: 'ordering',
-	assignedTrip: null,
+	assignedTrip: {},
 	lastDriver: null
     },
     created: function () {
@@ -64,10 +64,19 @@ var vm = new Vue({
 	  }.bind(this));
 	*/
 
+	socket.on('tripAssigned', function (trip) {
+	    if (trip.order.orderId == this.orderId){
+		this.assignedTrip = trip;
+	    }
+	}.bind(this));
+
 	socket.on('driverResponse', function (trip) {
 	    if (trip.order.orderId == this.orderId && trip.driverAccept){
 		this.assignedTrip = trip;
 		this.currentState = 'responding';
+	    }
+	    else {
+		this.assignedTrip = {};
 	    }
 	}.bind(this));
 
@@ -98,6 +107,7 @@ var vm = new Vue({
 	    if (trip.order.orderId == this.orderId){
 		this.currentState = 'rating';
 
+		this.assignedTrip = {};
 		this.chatLog = {};
 		this.lastDriver = trip.taxi.taxiId;
 		
@@ -337,13 +347,31 @@ var vm = new Vue({
 	addRequestButton: function (event) {
 	    this.requestButton = true;
 	},
+	cancelTrip: function () {
+	    socket.emit("tripCancelled", {
+		assigned: this.assignedTrip.tripId != undefined,
+		orderId: this.orderId,
+		trip: this.assignedTrip
+	    });
+	    this.toggleSearch();
+	    this.assignedTrip = {};
+	    this.currentState = "ordering";
+	    this.chatLog = {};
+	    
+	    this.map.removeLayer(this.destMarker);
+	    this.destMarker = null;
+	    
+	    this.map.removeLayer(this.connectMarkers);
+	    this.connectMarkers = null;
+
+	},
 	respondToTripRequest: function (response) {
 	    this.assignedTrip.customerAccept = response;
 	    socket.emit("customerResponse", this.assignedTrip);
 	    
 	    if (!response) {
 		this.currentState = 'assigning';
-		this.assignedTrip = null;
+		this.assignedTrip = {};
 	    } else {
 		this.currentState = 'waiting';
 	    }

@@ -57,11 +57,19 @@ var vm = new Vue({
 
       socket.on('chatMessageSent', function(message) {
 	  if (this.taxi.taxiId == message.taxi.taxiId){
-	      console.log('received');
 	      var tmp = this.chatLog;
 	      tmp[message.messageId] = message;
 	      this.chatLog = {}; // It works?
 	      this.chatLog = tmp;
+	  }
+      }.bind(this));
+
+      socket.on('tripCancelled', function(cancellation) {
+	  if (cancellation.assigned
+	      && this.assignedTrip.tripId == cancellation.trip.tripId){
+	      this.currentState = 'cancelled';
+	      this.assignedTrip = {};
+	      setTimeout(function(){this.currentState = 'assigning'; }.bind(this), 5000);
 	  }
       }.bind(this));
 

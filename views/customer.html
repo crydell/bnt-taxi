@@ -29,6 +29,15 @@
       
       <!-- Keep an overlay over the map, so that non-leaflet things can be used-->
       <div id="overlay">
+	
+	<!-- TODO: Make cancel button look nice -->
+	<button v-on:click="cancelTrip"
+		v-if="currentState == 'assigning' || currentState == 'waiting'"
+		id="cancel-btn">
+	  <h3>Cancel order</h3>
+	</button>
+
+	
 	<button v-show="requestButton == true" v-on:click="orderTaxi" id="send-order">
 	  Send order
 	</button>
@@ -64,11 +73,6 @@
 	</transition>
 	
 	<section v-show="currentState != 'ordering'" id="info">
-
-	  <!-- TODO: Make cancel button look nice -->
-	  <button v-on:click="cancelTrip"
-		  v-if="currentState == 'assigning' || currentState == 'waiting'">CANCEL TRIP</button>
-
 	  
 	  <!-- TODO: Make chat look nice -->
 	  

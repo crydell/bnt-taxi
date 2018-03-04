@@ -180,6 +180,7 @@ var vm = new Vue({
 	  if (this.currentState == 'inactive') {
 	      this.currentState = 'assigning';
 	      console.log("sending");
+	      this.taxi.timeJoined = new Date().getTime();
 	      socket.emit("addTaxi", this.taxi);
 	  }
 	  else {

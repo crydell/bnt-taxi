@@ -120,7 +120,7 @@
 		v-bind:class="{selected: selectedTaxi == taxi || taxiIsPending(taxi), unclickable: taxiIsPending(taxi)}">
 	      <div class="timer">
 		<div v-show="!taxiIsPending(taxi)">
-		  <h2>X min</h2>
+		  <h2>{{minutesSince(taxi.timeJoined)}} min</h2>
 		</div>
 		<div v-show="taxiIsPending(taxi)">
 		  <div class="loader white"></div>

@@ -13,6 +13,8 @@ var vm = new Vue({
 	taxiLocation: null,
 	orders: {},
 	chatLog: {},
+    currentDestination: null,
+    currentDestLine: null,
 	customerMarkers: {},
 	isAvailable: true,
       	assignedTrip: {},
@@ -35,6 +37,8 @@ var vm = new Vue({
 	  if (this.taxi.taxiId == trip.taxi.taxiId){
 	      this.assignedTrip = trip;
 	      this.currentState = 'responding';
+          this.currentDestination = L.marker(trip.order.fromLatLong, {icon: this.fromIcon}).addTo(this.map);
+          this.currentDestLine = L.polyline([this.taxiLocation.getLatLng(), this.currentDestination.getLatLng()], {color: 'blue'}).addTo(this.map);   
 	  }
       }.bind(this));
 
@@ -113,6 +117,7 @@ var vm = new Vue({
       else {
         this.taxiLocation.setLatLng(event.latlng);
         this.moveTaxi(event);
+        
       }
     },
 
@@ -132,6 +137,9 @@ var vm = new Vue({
 					latLong: [event.latlng.lat, event.latlng.lng]
 				      });
 	  }
+     if (this.currentDestLine != null) {
+       this.currentDestLine.setLatLngs([this.taxiLocation.getLatLng(), this.currentDestination.getLatLng()], {color: 'blue'});
+     }
     },
     quit: function () {
       socket.emit("taxiQuit", this.taxi.taxiId);
@@ -175,6 +183,8 @@ var vm = new Vue({
 	  socket.emit("driverResponse", this.assignedTrip);
 	  
 	  if (!response) {
+          this.map.removeLayer(this.currentDestination);
+          this.map.removeLayer(this.currentDestLine);
 	      this.assignedTrip = null;
 	      this.currentState = 'assigning';
 	  }
@@ -202,11 +212,18 @@ var vm = new Vue({
       markCustomerReady: function () {
 	  socket.emit("tripBegin", this.assignedTrip);
 	  this.currentState = 'driving';
+      this.map.removeLayer(this.currentDestination);
+      this.currentDestination = L.marker(this.assignedTrip.order.destLatLong).addTo(this.map);
+           if (this.currentDestLine != null) {
+               this.currentDestLine.setLatLngs([this.taxiLocation.getLatLng(), this.currentDestination.getLatLng()], {color: 'blue'});
+           }
       },
       markTripComplete: function () {
 	  this.lastCustomer = this.assignedTrip.order.customerId;
 	  socket.emit("tripCompleted", this.assignedTrip);
 	  this.currentState = 'rating';
+      this.map.removeLayer(this.currentDestination);
+      this.map.removeLayer(this.currentDestLine);
 	  this.chatLog = {};
 	  this.quit();
       },

@@ -119,6 +119,12 @@ nav li:hover, nav li.selected {
     overflow: auto;
 }
 
+.empty-list-message {
+    padding: 1em 2em ;
+    margin: 0.4em 0;
+    border-left: 4px solid #39f;
+}
+
 .assignment-list-item {
     display: flex;
     overflow: auto;

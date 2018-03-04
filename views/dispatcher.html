@@ -84,7 +84,7 @@
 		</ul>
 	      </div>
 	    </li>
-	    <ul v-if="order == selectedOrder && !orderIsPending(order)" class="assignment-selection">
+	    <ul v-if="order == selectedOrder && !orderIsPending(order)" class="assignment-selection" v-bind:class="{unclickable: taxisLength() == 0}">
 	      <li v-for="taxi in taxis" v-if="!taxiIsPending(taxi) && !taxiIsAssigned(taxi)" v-on:click="assignTaxi(order, taxi)">
 		<h3>{{taxi.name}} #{{taxi.taxiId}}
 		  <span style="width: 1em; display: inline-block;">&nbsp;</span>
@@ -97,11 +97,15 @@
 		  order.fromLatLong[1]).toFixed(2)}} km
 		</p>
 	      </li>
+
+	      <li v-if="taxisLength() == 0">
+		<h3>There are no taxis to assign</h3>
+	      </li>
 	    </ul>
 	  </div>
 
 	  
-	  <li class="assignment-list-item" v-if="ordersLength() == 0">
+	  <li class="empty-list-message" v-if="ordersLength() == 0">
 	    <h2>There are no customers waiting</h2>
 	  </li>
 	</ul>
@@ -136,7 +140,7 @@
 
 	    </li>
 	    
-	    <ul v-if="taxi == selectedTaxi && !taxiIsPending(taxi)" class="assignment-selection">
+	    <ul v-if="taxi == selectedTaxi && !taxiIsPending(taxi)" class="assignment-selection" v-bind:class="{unclickable: ordersLength() == 0}">
 	      <li v-for="order in orders" v-if="!orderIsPending(order) && !orderIsAssigned(order)" v-on:click="assignTaxi(order, taxi)">
 		<h3>{{order.name}} #{{order.orderId}}
 		  <span style="width: 1em; display: inline-block;">&nbsp;</span>
@@ -149,11 +153,14 @@
 		  order.fromLatLong[1]).toFixed(2)}} km
 		</p>
 	      </li>
+	      <li v-if="ordersLength() == 0">
+		<h3>There are no orders to assign to</h3>
+	      </li>
 	    </ul>
 	  </div>
 
 	  
-	  <li class="assignment-list-item" v-if="taxisLength() == 0">
+	  <li class="empty-list-message" v-if="taxisLength() == 0">
 	    <h2>There are no taxis currently available</h2>
 	  </li>
 	</ul>
@@ -201,7 +208,7 @@
 	    </ul>
 	  </div>
 	  
-	  <li class="assignment-list-item" v-if="Object.keys(trips).length == 0">
+	  <li class="empty-list-message" v-if="Object.keys(trips).length == 0">
 	    <div class="description">
 	      <h2>There are no currently ongoing trips</h2>
 	    </div>

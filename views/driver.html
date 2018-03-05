@@ -34,7 +34,7 @@
       <div v-if="currentState=='responding'">
 	<h3>You've been assigned {{assignedTrip.order.name}} with a rating of {{assignedTrip.order.rating}}</h3>
 	<button v-on:click="respondToTripRequest(true)" class="accept-btn">Accept</button>
-	<button v-on:click="respondToTripRequest(false)" class="decline-btn">Decline</button>
+  <button v-on:click="respondToTripRequest(false)" class="decline-btn">Decline</button>
       </div>
 
       <div v-if="currentState=='responded'">
@@ -48,28 +48,26 @@
 	<h3>Resuming search...</h3>
       </div>
 
-      
-      <div v-show="currentState=='pickup' || currentState=='waiting'">
-        <button  @click="isAvailable = isAvailable" id="chat-button">
-          <h3>Chat</h3>
-        </button>
-
-	<!-- TODO: Make chat look nice -->
-	<div>
-	  <p v-for="message in chatLog">
-	    {{message.timeSent}} {{message.sender}}:
-	    {{message.message}}
-	  </p>
-	  
-	  <form action="#" onsubmit="return false">
-	    <input type="text" autocomplete="off" id="messageField">
-	    <input type="submit" value="Send message" v-on:click="sendChatMessage"/>
-	  </form>
-	</div>
-      </div>
-    </section>
-
     <div id="overlay">
+
+        <div v-show="currentState=='pickup' || currentState=='waiting'" class="chat-box">
+            <div class="open">Chat
+              <div class="box">
+          <br>
+          <div>
+            <p v-for="message in chatLog">
+              {{message.timeSent}} {{message.sender}}:
+              {{message.message}}</p>
+            
+            <form action="#" onsubmit="return false">
+              <input type="text" autocomplete="off" id="messageField">
+              <input type="submit" value="Send message" v-on:click="sendChatMessage"/>
+            </form>
+          </div>
+          <br>
+              </div>
+            </div>
+          </div>
       
         <button v-show="currentState=='inactive'||currentState=='assigning'" v-on:click="toggleAvailable" class="taxi-button1">
             <h3>Mark as {{ currentState == 'assigning' ? 'Unavailable' : 'Available' }}</h3>

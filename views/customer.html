@@ -76,11 +76,11 @@
 	  
 	  <!-- TODO: Make chat look nice -->
 	  
-	  <div class="chat-box">
-	    <div class="open">Open
+	  <div v-show="currentState == 'waiting' || currentState == arrived" class="chat-box">
+	    <div class="open">Chat
 	      <div class="box">
 		<br>
-		<div v-show="currentState == 'waiting' || currentState == 'arrived'">
+		<div>
 		  <p v-for="message in chatLog">
 		    {{message.timeSent}} {{message.sender}}:
 		    {{message.message}}</p>
@@ -92,8 +92,8 @@
 		</div>
 		<br>
 	      </div>
-	      <div>
-		<div>
+			</div>
+		</div>
 	  
 	  <div v-show="currentState == 'assigning'">
 	    <img class="loading-icon" src="img/loading.png"></img>

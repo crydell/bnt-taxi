@@ -25,7 +25,7 @@
       <div id="status-box" v-show="currentState=='assigning' || currentState=='responding' || currentState=='responded' || currentState=='cancelled'">
 	<div v-show="currentState=='assigning'">
           <h1 align="center">
-            TAXI DRIVER # {{ taxi.taxiId }} {{ taxi.name }}
+            {{ taxi.name }} #{{ taxi.taxiId }}
           </h1>
 
           <div class="loader"></div>
@@ -33,9 +33,11 @@
 	</div>
 
 	<div v-if="currentState=='responding'">
-	  <h3>You've been assigned {{assignedTrip.order.name}} with a rating of {{assignedTrip.order.rating}}</h3>
-	  <button v-on:click="respondToTripRequest(true)" class="accept-btn">Accept</button>
-	  <button v-on:click="respondToTripRequest(false)" class="decline-btn">Decline</button>
+	  <h1>{{assignedTrip.order.name}}</h1>
+	  <h1><span v-for="n in Math.round(assignedTrip.order.rating)">★</span></h1>
+	  <h3>Has been assigned as your passenger</h3>
+	  <button v-on:click="respondToTripRequest(true)" class="accept-btn"><h3>Accept</h3></button>
+	  <button v-on:click="respondToTripRequest(false)" class="decline-btn"><h3>Decline</h3></button>
 	</div>
 
 	<div v-if="currentState=='responded'">
@@ -70,27 +72,26 @@
 
 	
         <div v-show="currentState=='pickup' || currentState=='waiting'" class="chat-box">
-          <div class="open">Chat
+          <div class="open"><h3 id="chat-button">Chat</h3>
             <div class="box">
               <br>
               <div>
 		<p v-for="message in chatLog">
 		  {{message.timeSent}} {{message.sender}}:
 		  {{message.message}}</p>
-		
+		<br>
 		<form action="#" onsubmit="return false">
 		  <input type="text" autocomplete="off" id="messageField">
-		  <input type="submit" value="Send message" v-on:click="sendChatMessage"/>
+		  <input type="submit" id="send-button" value="Send" v-on:click="sendChatMessage"/>
 		</form>
               </div>
-              <br>
             </div>
           </div>
         </div>
 
-	
-	<div v-if="currentState=='rating'">
-	  <p>How was your passenger?</p>
+	<section id="info" v-if="currentState=='rating'">
+	  <div>
+	  <h1>How was your passenger?</h1>
     <form class="rating">
       <label>
         <input @click="giveRating(1)" type="radio" name="stars" value="1" />
@@ -123,7 +124,8 @@
         <span class="icon">★</span>
       </label>
     </form>
-	</div>
+	  </div>
+	  </section>
     </div>
 <!--
     <section id="driver-info">

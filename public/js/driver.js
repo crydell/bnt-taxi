@@ -133,10 +133,8 @@ var vm = new Vue({
 
     putCustomerLocation: function (order){
       var fromMarker = L.marker(order.fromLatLong, {icon: this.fromIcon}).addTo(this.map);
-      fromMarker.bindPopup(this.createPopup(order.orderId, order.orderItems));
       fromMarker.orderId = order.orderId;
       var destMarker = L.marker(order.destLatLong).addTo(this.map);
-      destMarker.bindPopup(this.createPopup(order.orderId, order.orderItems));
       destMarker.orderId = order.orderId;
       
 

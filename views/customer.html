@@ -73,56 +73,42 @@
 	</transition>
 
 
-	<div v-show="currentState == 'waiting' || currentState == 'arrived'" class="chat-box">
-	  <div class="open">Chat
-	    <div class="box">
-	      <br>
-	      <div>
-		<p v-for="message in chatLog">
-		  {{message.timeSent}} {{message.sender}}:
-		  {{message.message}}</p>
-		
-		<form action="#" onsubmit="return false">
-		  <input type="text" autocomplete="off" id="messageField">
-		  <input type="submit" value="Send message" v-on:click="sendChatMessage"/>
-		</form>
-	      </div>
-	      <br>
-	    </div>
-	  </div>
-	</div>
 	
 	
 	<section v-show="currentState != 'ordering'" id="info">
-	  
-	  <!-- TODO: Make chat look nice -->
 	 
 	  <div v-show="currentState == 'assigning'">
-	    <img class="loading-icon" src="img/loading.png"></img>
-	    <p>Waiting for a driver to be dispatched...</p>
+	    <h1>Assigning driver...</h1>
+	    <div class="loader"></div>
+	    <h3>Waiting for a driver to be dispatched</h3>
 	  </div>
 
 	  <div v-if="currentState == 'responding'">
-	    <p>{{assignedTrip.taxi.name}} with a rating of {{assignedTrip.taxi.rating}} has been assigned to you.</p>
-	    <button v-on:click="respondToTripRequest(true)" class="accept-btn">Accept</button>
-	    <button v-on:click="respondToTripRequest(false)" class="decline-btn">Decline</button>
+	    <h1>{{assignedTrip.taxi.name}}</h1>
+	    <h1><span v-for="n in Math.round(assignedTrip.taxi.rating)">★</span></h1>
+	    <h3>Has been assigned as your driver</h3>
+	    <button v-on:click="respondToTripRequest(true)" class="accept-btn"><h3>Accept</h3></button>
+	    <button v-on:click="respondToTripRequest(false)" class="decline-btn"><h3>Decline</h3></button>
 	  </div>
 
 	  <div v-show="currentState == 'waiting'">
-	    <img class="loading-icon" src="img/loading.png"></img>
-	    <p>A driver is on its way, please wait...</p>
+	    <h1>A driver is on its way</h1>
+	    <div class="loader"></div>
+	    <h3>Please wait...</h3>
 	  </div>
 
 	  <div v-show="currentState == 'arrived'">
-	    <p>Your driver is here! Proceed to the car...</p>
+	    <h1>Your driver is here</h1>
+	    <h3>Please proceed to the car</h3>
 	  </div>
 
 	  <div v-show="currentState == 'travelling'">
-	    <p>You're on your way! Sit back and relax.</p>
+	    <h1>You're on your way!</h1>
+	    <h3>Sit back and relax</h3>
 	  </div>
 
 	  <div v-show="currentState == 'rating'">
-	    <p>Would you like to rate your driver?</p>
+	    <h1>How was your driver?</h1>
 			<form class="rating">
 				<label>
 					<input @click="giveRating(1)" type="radio" name="stars" value="1" />
@@ -165,9 +151,27 @@
 	  </div>
 
 	  <div v-show="currentState == 'thanking'">
-	    <p>Thank you for travelling with bnt\taxi!</p>
+	    <h3>Thank you for travelling with bnt\taxi!</h3>
 	  </div>
 	</section>
+	<div v-show="currentState == 'waiting' || currentState == 'arrived'" class="chat-box">
+	  <div class="open"><h3 id="chat-button">Chat</h3>
+            <div class="box">
+              <br>
+              <div>
+		<p v-for="message in chatLog">
+		  {{message.timeSent}} {{message.sender}}:
+		  {{message.message}}</p>
+		<br>
+		<form action="#" onsubmit="return false">
+		  <input type="text" autocomplete="off" id="messageField">
+		  <input type="submit" id="send-button" value="Send" v-on:click="sendChatMessage"/>
+		</form>
+              </div>
+            </div>
+          </div>
+	</div>
+	
       </div>
     </div>
   </body>

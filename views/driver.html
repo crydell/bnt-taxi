@@ -5,30 +5,143 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>TAXI DRIVER</title>
   <link rel="stylesheet" href="leaflet/leaflet.css">
+  <link rel="stylesheet" href="/esri-leaflet-geocoder/esri-leaflet-geocoder.css">
   <link rel="stylesheet" href="css/taxi.css">
+  <link href="https://fonts.googleapis.com/css?family=Maven+Pro" rel="stylesheet">
+  <script src="js/utils.js"></script>
   <script src="/vue/vue.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/leaflet/leaflet.js"></script>
   <script src="js/driver.js" defer></script>
+  <!--<script src="js/customer.js" defer></script>-->
 </head>
 <body>
   <div id="page">
-  	<h1>
-	    TAXI DRIVER # {{ taxiId }}
-	  </h1>
+  	
     <div id="my-map"></div>
-    <ul>
-      <div v-for="order in orders" v-if="order.taxiId == taxiId">
-        # {{ order.orderId}} From: {{ order.fromLatLong[0].toFixed(3) }}, {{ order.fromLatLong[1].toFixed(3) }} Destination: {{ order.destLatLong[0].toFixed(3) }}, {{ order.destLatLong[1].toFixed(3) }}
-        <ul>
-          <li v-for="item in order.orderItems">
-            {{ item }}
-          </li>
-        </ul>
-        <button v-on:click="acceptOrder(order)">ACCEPT</button><button v-on:click="finishOrder(order.orderId)">FINISH</button>
+
+    <section id="driver-info">
+
+      <div id="status-box" v-show="currentState=='assigning' || currentState=='responding' || currentState=='responded' || currentState=='cancelled'">
+	<div v-show="currentState=='assigning'">
+          <h1 align="center">
+            {{ taxi.name }} #{{ taxi.taxiId }}
+          </h1>
+
+          <div class="loader"></div>
+          <div><h3>Waiting for customer...</h3></div>
+	</div>
+
+	<div v-if="currentState=='responding'">
+	  <h1>{{assignedTrip.order.name}}</h1>
+	  <h1><span v-for="n in Math.round(assignedTrip.order.rating)">★</span></h1>
+	  <h3>Has been assigned as your passenger</h3>
+	  <button v-on:click="respondToTripRequest(true)" class="accept-btn"><h3>Accept</h3></button>
+	  <button v-on:click="respondToTripRequest(false)" class="decline-btn"><h3>Decline</h3></button>
+	</div>
+
+	<div v-if="currentState=='responded'">
+	  <h3>Waiting for {{assignedTrip.order.name}} to accept...</h3>
+	  
+          <div class="loader"></div>
+	</div>
+
+	<div v-if="currentState=='cancelled'">
+	  <h1 align="center">The order has been cancelled</h1>
+	  <h3>Resuming search...</h3>
+	</div>
       </div>
-    </ul>
-    <button v-on:click="quit">Quit</button>
+
+    <div id="overlay">
+      
+        <button v-show="currentState=='inactive'||currentState=='assigning'" v-on:click="toggleAvailable" class="taxi-button1">
+            <h3>Mark as {{ currentState == 'assigning' ? 'Unavailable' : 'Available' }}</h3>
+        </button>
+
+        <button v-show="currentState=='pickup'" v-on:click="markAtCustomer" class="taxi-button1">
+            <h3>Arrived at customer</h3>
+        </button>
+
+        <button v-show="currentState=='waiting'" v-on:click="markCustomerReady" class="taxi-button1">
+            <h3>Customer is in</h3>
+        </button>
+
+        <button v-show="currentState=='driving'" v-on:click="markTripComplete" class="taxi-button1">
+            <h3>Complete Trip</h3>
+        </button>
+
+	
+        <div v-show="currentState=='pickup' || currentState=='waiting'" class="chat-box">
+          <div class="open"><h3 id="chat-button">Chat</h3>
+            <div class="box">
+              <br>
+              <div>
+		<p v-for="message in chatLog">
+		  {{message.timeSent}} {{message.sender}}:
+		  {{message.message}}</p>
+		<br>
+		<form action="#" onsubmit="return false">
+		  <input type="text" autocomplete="off" id="messageField">
+		  <input type="submit" id="send-button" value="Send" v-on:click="sendChatMessage"/>
+		</form>
+              </div>
+            </div>
+          </div>
+        </div>
+
+	<section id="info" v-if="currentState=='rating'">
+	  <div>
+	  <h1>How was your passenger?</h1>
+    <form class="rating">
+      <label>
+        <input @click="giveRating(1)" type="radio" name="stars" value="1" />
+        <span class="icon">★</span>
+      </label>
+      <label>
+        <input @click="giveRating(2)" type="radio" name="stars" value="2" />
+        <span class="icon">★</span>
+        <span class="icon">★</span>
+      </label>
+      <label>
+        <input @click="giveRating(3)" type="radio" name="stars" value="3" />
+        <span class="icon">★</span>
+        <span class="icon">★</span>
+        <span class="icon">★</span>   
+      </label>
+      <label>
+        <input @click="giveRating(4)" type="radio" name="stars" value="4" />
+        <span class="icon">★</span>
+        <span class="icon">★</span>
+        <span class="icon">★</span>
+        <span class="icon">★</span>
+      </label>
+      <label>
+        <input @click="giveRating(5)"type="radio" name="stars" value="5" />
+        <span class="icon">★</span>
+        <span class="icon">★</span>
+        <span class="icon">★</span>
+        <span class="icon">★</span>
+        <span class="icon">★</span>
+      </label>
+    </form>
+	  </div>
+	  </section>
+    </div>
+<!--
+    <section id="driver-info">
+
+
+      <div id="show-more">
+          
+        
+      </div>
+
+    </section>
+    -->
+    <!--<button v-on:click="markAtCustomer">Mark that you're at the customer</button>
+    <button v-on:click="markCustomerReady">Mark that the customer is in and you have begun driving them</button>
+    <button v-on:click="markTripComplete">Mark that the trip is complete</button>
+    <button v-on:click="quit">Quit</button>-->
   </div>
 </body>
 </html>

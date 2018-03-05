@@ -1,28 +1,178 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>TAXI CUSTOMER</title>
-  <link rel="stylesheet" href="leaflet/leaflet.css">
-  <link rel="stylesheet" href="/esri-leaflet-geocoder/esri-leaflet-geocoder.css">
-  <link rel="stylesheet" href="css/taxi.css">
-  <script src="/vue/vue.js"></script>
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="/leaflet/leaflet.js"></script>
-  <script src="/esri-leaflet/esri-leaflet.js"></script> 
-  <script src="/esri-leaflet-geocoder/esri-leaflet-geocoder.js"></script> 
-  <script src="js/customer.js" defer></script>
-</head>
-<body>
-  <h1>
-    TAXI CUSTOMER 
-  </h1>
-  <p>Select destination first, then your location</p>
-  <div id="page">
-    <div id="my-map"></div>
-    <button v-on:click="orderTaxi">ORDER TAXI</button>
-    Your order number is {{ orderId }}
-  </div>
-</body>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>TAXI CUSTOMER</title>
+    <link rel="stylesheet" href="leaflet/leaflet.css">
+    <link rel="stylesheet" href="/esri-leaflet-geocoder/esri-leaflet-geocoder.css">
+    <link rel="stylesheet" href="css/taxi.css">
+    <link href="https://fonts.googleapis.com/css?family=Maven+Pro" rel="stylesheet">
+    <script src="js/utils.js"></script>
+    <script src="/vue/vue.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/leaflet/leaflet.js"></script>
+    <script src="/esri-leaflet/esri-leaflet.js"></script> 
+    <script src="/esri-leaflet-geocoder/esri-leaflet-geocoder.js"></script> 
+    <script src="js/customer.js" defer></script>
+  </head>
+  <body>
+    <div id="page">
+      <div id="my-map"></div>
+
+
+      <!-- Overlay for the search controls, populated in the javascript -->
+      <section id="map-search-area">
+	
+      </section>
+
+      
+      <!-- Keep an overlay over the map, so that non-leaflet things can be used-->
+      <div id="overlay">
+	
+	<!-- TODO: Make cancel button look nice -->
+	<button v-on:click="cancelTrip"
+		v-if="currentState == 'assigning' || currentState == 'waiting'"
+		id="cancel-btn">
+	  <h3>Cancel order</h3>
+	</button>
+
+	
+	<button v-show="requestButton == true" v-on:click="orderTaxi" id="send-order">
+	  Send order
+	</button>
+
+	<button v-show="currentState == 'ordering'" v-on:click="showingMore = !showingMore" id="show-more">
+	  <h3>{{ showingMore ? 'Hide' : 'Show' }} additional options</h3>
+	</button>
+
+	<transition mode="out-in" name="fade">
+	  <section v-show="showingMore && currentState == 'ordering'" id="additional">
+	    <form id="additional-form">
+	      <span>
+		<label for="passengers">Number of passengers: </label>
+		<input type="number" min="1" value="1" name="passengers">
+	      </span>
+	      <br>
+	      <span>
+		<label for="bags">Number of bags: </label>
+		<input type="number" min="0" value="0" name="bags">
+	      </span>
+	      <br>
+	      <span>
+		<label for="fardtjanst">Färdtjänst?</label>
+		<input type="checkbox" name="fardtjanst">
+	      </span>
+	      <br>
+	      <span>
+		<label for="childseat">Children's seat required?</label>
+		<input type="checkbox"  name="childseat">
+	      </span>
+	    </form>
+	  </section>
+	</transition>
+
+
+	
+	
+	<section v-show="currentState != 'ordering'" id="info">
+	 
+	  <div v-show="currentState == 'assigning'">
+	    <h1>Assigning driver...</h1>
+	    <div class="loader"></div>
+	    <h3>Waiting for a driver to be dispatched</h3>
+	  </div>
+
+	  <div v-if="currentState == 'responding'">
+	    <h1>{{assignedTrip.taxi.name}}</h1>
+	    <h1><span v-for="n in Math.round(assignedTrip.taxi.rating)">★</span></h1>
+	    <h3>Has been assigned as your driver</h3>
+	    <button v-on:click="respondToTripRequest(true)" class="accept-btn"><h3>Accept</h3></button>
+	    <button v-on:click="respondToTripRequest(false)" class="decline-btn"><h3>Decline</h3></button>
+	  </div>
+
+	  <div v-show="currentState == 'waiting'">
+	    <h1>A driver is on its way</h1>
+	    <div class="loader"></div>
+	    <h3>Please wait...</h3>
+	  </div>
+
+	  <div v-show="currentState == 'arrived'">
+	    <h1>Your driver is here</h1>
+	    <h3>Please proceed to the car</h3>
+	  </div>
+
+	  <div v-show="currentState == 'travelling'">
+	    <h1>You're on your way!</h1>
+	    <h3>Sit back and relax</h3>
+	  </div>
+
+	  <div v-show="currentState == 'rating'">
+	    <h1>How was your driver?</h1>
+			<form class="rating">
+				<label>
+					<input @click="giveRating(1)" type="radio" name="stars" value="1" />
+					<span class="icon">★</span>
+				</label>
+				<label>
+					<input @click="giveRating(2)" type="radio" name="stars" value="2" />
+					<span class="icon">★</span>
+					<span class="icon">★</span>
+				</label>
+				<label>
+					<input @click="giveRating(3)" type="radio" name="stars" value="3" />
+					<span class="icon">★</span>
+					<span class="icon">★</span>
+					<span class="icon">★</span>   
+				</label>
+				<label>
+					<input @click="giveRating(4)" type="radio" name="stars" value="4" />
+					<span class="icon">★</span>
+					<span class="icon">★</span>
+					<span class="icon">★</span>
+					<span class="icon">★</span>
+				</label>
+				<label>
+					<input @click="giveRating(5)"type="radio" name="stars" value="5" />
+					<span class="icon">★</span>
+					<span class="icon">★</span>
+					<span class="icon">★</span>
+					<span class="icon">★</span>
+					<span class="icon">★</span>
+				</label>
+			</form>
+			
+			<!--<button v-on:click="giveRating(0)"><h3>Not this time</h3></button>
+	    <button v-on:click="giveRating(1)"><h3>1 star</h3></button>
+	    <button v-on:click="giveRating(2)"><h3>2 stars</h3></button>
+	    <button v-on:click="giveRating(3)"><h3>3 stars</h3></button>
+	    <button v-on:click="giveRating(4)"><h3>4 stars</h3></button>
+	    <button v-on:click="giveRating(5)"><h3>5 stars</h3></button>-->
+	  </div>
+
+	  <div v-show="currentState == 'thanking'">
+	    <h3>Thank you for travelling with bnt\taxi!</h3>
+	  </div>
+	</section>
+	<div v-show="currentState == 'waiting' || currentState == 'arrived'" class="chat-box">
+	  <div class="open"><h3 id="chat-button">Chat</h3>
+            <div class="box">
+              <br>
+              <div>
+		<p v-for="message in chatLog">
+		  {{message.timeSent}} {{message.sender}}:
+		  {{message.message}}</p>
+		<br>
+		<form action="#" onsubmit="return false">
+		  <input type="text" autocomplete="off" id="messageField">
+		  <input type="submit" id="send-button" value="Send" v-on:click="sendChatMessage"/>
+		</form>
+              </div>
+            </div>
+          </div>
+	</div>
+	
+      </div>
+    </div>
+  </body>
 </html>

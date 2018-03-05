@@ -5,22 +5,78 @@
 var socket = io();
 
 var vm = new Vue({
-  el: '#page',
-  data: {
-    map: null,
-    taxiId: 0,
-    taxiLocation: null,
-    orders: {},
-    customerMarkers: {}
-  },
+    el: '#page',
+    data: {
+	map: null,
+	taxiId: 0,
+	taxi: {}, 
+	taxiLocation: null,
+	orders: {},
+	chatLog: {},
+    currentDestination: null,
+    currentDestLine: null,
+	customerMarkers: {},
+	isAvailable: true,
+      	assignedTrip: {},
+	currentState: 'inactive'
+    },
   created: function () {
     socket.on('initialize', function (data) {
       this.orders = data.orders;
+    
+      for(var orderId in data.orders) {
+        this.customerMarkers[orderId] = this.putCustomerLocation(data.orders[orderId]);
+      }
     }.bind(this));
+
     socket.on('currentQueue', function (data) {
       this.orders = data.orders;
     }.bind(this));
-    // this icon is not reactive
+
+      socket.on('tripAssigned', function(trip) {
+	  if (this.taxi.taxiId == trip.taxi.taxiId){
+	      this.assignedTrip = trip;
+	      this.currentState = 'responding';
+          this.currentDestination = L.marker(trip.order.fromLatLong, {icon: this.fromIcon}).addTo(this.map);
+          this.currentDestLine = L.polyline([this.taxiLocation.getLatLng(), this.currentDestination.getLatLng()], {color: 'blue'}).addTo(this.map);   
+	  }
+      }.bind(this));
+
+      socket.on('customerResponse', function(trip) {
+	  if (this.taxi.taxiId == trip.taxi.taxiId){
+	      if (trip.customerAccept) {
+		  this.currentState = 'pickup';
+	      }
+	      else {
+		  this.currentState = 'assigning';
+		  this.assignedTrip = null;
+	      }
+	  }
+      }.bind(this));
+
+
+      socket.on('chatMessageSent', function(message) {
+	  if (this.taxi.taxiId == message.taxi.taxiId){
+	      var tmp = this.chatLog;
+	      tmp[message.messageId] = message;
+	      this.chatLog = {}; // It works?
+	      this.chatLog = tmp;
+	  }
+      }.bind(this));
+
+      socket.on('tripCancelled', function(cancellation) {
+	  if (cancellation.assigned
+	      && this.assignedTrip.tripId == cancellation.trip.tripId){
+	      this.currentState = 'cancelled';
+	      this.assignedTrip = {};
+	      this.map.removeLayer(this.currentDestination);
+	      this.map.removeLayer(this.currentDestLine);
+	      setTimeout(function(){this.currentState = 'assigning'; }.bind(this), 5000);
+	  }
+      }.bind(this));
+
+
+      // this icon is not reactive
     this.taxiIcon = L.icon({
       iconUrl: "img/taxi.png",
       iconSize: [36,36],
@@ -39,11 +95,15 @@ var vm = new Vue({
       return Math.floor(Math.random() * (max - min)) + min;
     }
     // It's probably not a good idea to generate a random taxi number, client-side. 
-    this.taxiId = getRandomInt(1, 1000000);
+      this.taxi.taxiId = getRandomInt(1, 1000000);
+      // Temporary solution so everything doesn't break, should still place the car manually
+      this.taxi.latLong = [59.51301, 17.38425]; 
+      this.taxi.name = generateName();
   },
   mounted: function () {
     // set up the map
     this.map = L.map('my-map').setView([59.8415,17.648], 13);
+    this.map.removeControl(this.map.zoomControl);
 
     // create the tile layer with correct attribution
     var osmUrl='http://{s}.tile.osm.org/{z}/{x}/{y}.png';
@@ -55,35 +115,46 @@ var vm = new Vue({
     this.map.on('click', this.setTaxiLocation);
   },
   beforeDestroy: function () {
-    socket.emit('taxiQuit', this.taxiId);
+    socket.emit('taxiQuit', this.taxi.taxiId);
   },
   methods: {
     setTaxiLocation: function (event) {
       if (this.taxiLocation === null) {
         this.taxiLocation = L.marker([event.latlng.lat, event.latlng.lng], {icon: this.taxiIcon, draggable: true}).addTo(this.map);
-        this.taxiLocation.on("drag", this.moveTaxi);
-        socket.emit("addTaxi", { taxiId: this.taxiId,
-                                latLong: [event.latlng.lat, event.latlng.lng]
-                                });
+          this.taxiLocation.on("drag", this.moveTaxi);
+	  this.taxi.latLong = [event.latlng.lat, event.latlng.lng];
       }
       else {
         this.taxiLocation.setLatLng(event.latlng);
         this.moveTaxi(event);
+        
       }
     },
-    moveTaxi: function (event) {
-      socket.emit("moveTaxi", { taxiId: this.taxiId,
-                                latLong: [event.latlng.lat, event.latlng.lng]
-                                });
+
+    putCustomerLocation: function (order){
+      var fromMarker = L.marker(order.fromLatLong, {icon: this.fromIcon}).addTo(this.map);
+      fromMarker.orderId = order.orderId;
+      var destMarker = L.marker(order.destLatLong).addTo(this.map);
+      destMarker.orderId = order.orderId;
+      
+
+    },
+      moveTaxi: function (event) {
+	  if (this.currentState != 'inactive'){
+	      socket.emit("moveTaxi", { taxiId: this.taxi.taxiId,
+					latLong: [event.latlng.lat, event.latlng.lng]
+				      });
+	  }
+     if (this.currentDestLine != null) {
+       this.currentDestLine.setLatLngs([this.taxiLocation.getLatLng(), this.currentDestination.getLatLng()], {color: 'blue'});
+     }
     },
     quit: function () {
-      this.map.removeLayer(this.taxiLocation);
-      this.taxiLocation = null;
-      socket.emit("taxiQuit", this.taxiId);
+      socket.emit("taxiQuit", this.taxi.taxiId);
     },
     acceptOrder: function (order) {
         this.customerMarkers = this.putCustomerMarkers(order);
-        order.taxiIdConfirmed = this.taxiId;
+        order.taxiIdConfirmed = this.taxi.taxiId;
         socket.emit("orderAccepted", order);
     },
     finishOrder: function (orderId) {
@@ -102,5 +173,75 @@ var vm = new Vue({
       var connectMarkers = L.polyline([order.fromLatLong, order.destLatLong], {color: 'blue'}).addTo(this.map);
       return {from: fromMarker, dest: destMarker, line: connectMarkers};
     },
+      
+      toggleAvailable: function () {
+	  if (this.currentState == 'inactive') {
+	      this.currentState = 'assigning';
+	      console.log("sending");
+	      this.taxi.timeJoined = new Date().getTime();
+	      socket.emit("addTaxi", this.taxi);
+	  }
+	  else {
+	      this.currentState = 'inactive';
+	      this.quit();
+	  }
+      },
+      
+      respondToTripRequest: function (response) {
+	  this.assignedTrip.driverAccept = response;
+	  socket.emit("driverResponse", this.assignedTrip);
+	  
+	  if (!response) {
+          this.map.removeLayer(this.currentDestination);
+          this.map.removeLayer(this.currentDestLine);
+	      this.assignedTrip = null;
+	      this.currentState = 'assigning';
+	  }
+	  else {
+	      this.currentState = 'responded';
+	  }
+      },
+
+      sendChatMessage: function (msg) {
+	  socket.emit("chatMessageSent",
+		      {
+			  messageId: new Date(),
+			  sender: this.taxi.name,
+			  taxi: this.taxi,
+			  order: this.assignedTrip.order,
+			  message: document.getElementById('messageField').value,
+			  timeSent: formatTime(new Date())});
+	  document.getElementById('messageField').value = "";
+      },
+      
+      markAtCustomer: function () {
+	  socket.emit("driverWaiting", this.assignedTrip);
+	  this.currentState = 'waiting';
+      },
+      markCustomerReady: function () {
+	  socket.emit("tripBegin", this.assignedTrip);
+	  this.currentState = 'driving';
+      this.map.removeLayer(this.currentDestination);
+      this.currentDestination = L.marker(this.assignedTrip.order.destLatLong).addTo(this.map);
+           if (this.currentDestLine != null) {
+               this.currentDestLine.setLatLngs([this.taxiLocation.getLatLng(), this.currentDestination.getLatLng()], {color: 'blue'});
+           }
+      },
+      markTripComplete: function () {
+	  this.lastCustomer = this.assignedTrip.order.customerId;
+	  socket.emit("tripCompleted", this.assignedTrip);
+	  this.currentState = 'rating';
+      this.map.removeLayer(this.currentDestination);
+      this.map.removeLayer(this.currentDestLine);
+	  this.chatLog = {};
+	  this.quit();
+      },
+      giveRating: function (rating) {
+	  socket.emit("giveRating",
+		      {forCustomer: true,
+		       customerId: this.lastCustomer,
+		       rating: rating});
+	  this.currentState = 'inactive';
+      }
   }
 });

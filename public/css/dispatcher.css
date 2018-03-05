@@ -1,0 +1,261 @@
+@import url('https://fonts.googleapis.com/css?family=Roboto|Roboto+Slab');
+
+h1, h2, h3 {
+    font-family: "Roboto Slab", serif;
+}
+
+body {
+    display: flex;
+    height: 100vh;
+    flex-direction: column;
+    overflow: hidden;
+    font-family: "Roboto", sans-serif;
+    color: #333;
+}
+
+#page {
+    display: grid;
+    grid-template-columns: 40% 60%;
+    overflow: hidden;
+    height: 100vh;
+    width: 100vw;
+}
+
+.left {
+    grid-column: 1;
+}
+
+.right {
+    grid-column: 2;
+}
+
+section {
+    padding: 1em;
+}
+
+
+
+/* ===========================================
+
+Header
+
+=========================================== */
+
+header {
+    padding: 0.5em 1em;
+    margin: 0 1em;
+    border-bottom: 4px dashed;
+}
+
+header h1, header h2 {
+    padding: 0;
+    margin: 0;
+}
+
+header h1 {
+    font-size: 4em;
+}
+
+.header-bnt {
+    
+}
+
+.header-taxi {
+    color: #39f;
+}
+
+header h2 {
+    font-size: 2em;
+}
+
+
+
+/* ===========================================
+
+Assignment menu
+
+=========================================== */
+
+#assignment {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/*
+  Navigation menu
+*/
+
+nav ul {
+    padding: 0;
+    margin: 0;
+    border-bottom: 4px solid #39f;
+}
+
+nav li {
+    min-width: 5em;
+    padding: 1em 2em;
+    margin: 0 0.2em 0 0;
+    display: inline-block;
+    background-color: #8cf;
+    cursor: pointer;
+    text-align: center;
+    color: #fff;
+}
+
+nav li:hover, nav li.selected {
+    background-color: #39f;
+}
+
+
+/*
+  List of orders/taxis/ongoing routes
+*/
+
+.assignment-list {
+    padding: 0;
+    margin: 0;
+    flex-grow: 1;
+    overflow: auto;
+}
+
+.empty-list-message {
+    padding: 1em 2em ;
+    margin: 0.4em 0;
+    border-left: 4px solid #39f;
+}
+
+.assignment-list-item {
+    display: flex;
+    overflow: auto;
+    border-left: 4px solid #39f;
+    padding: 0;
+    margin: 0.4em 0 0 0;
+    list-style-type: none;
+}
+
+.assignment-list-item .timer {
+    padding: 2em 0;
+    color: #fff;
+    background-color: #39f;
+    text-align: center;
+    width: 9em;
+}
+
+.assignment-list-item .description {
+    padding: 1em;
+    flex-grow: 1;
+}
+
+.assignment-list-item h2 {
+    margin: 0 0 1em 0;
+}
+
+.assignment-list-item h3 {
+    display: inline-block;
+    width: 100%;
+    margin: 0;
+}
+
+.assignment-list-item.selected .description, .assignment-list-item:hover .description {
+    background-color: #39f;
+    color: #fff;
+}
+
+.assignment-list-item.unclickable:hover {
+    cursor: default;
+}
+
+.assignment-list-item:hover {
+    cursor: pointer;
+}
+
+.assignment-list .from {
+    float: left;
+}
+
+.assignment-list .to {
+    float: right;
+}
+
+.assignment-selection {
+    padding: 0;
+    margin: 0;
+}
+
+.assignment-selection > li, .assignment-selection.unclickable > li:hover {
+    border-left: 4px solid #39f;
+    background-color: #eee;
+    list-style-type: none;
+    margin: 0.2em 0;
+    padding: 1em;
+}
+
+.assignment-selection > li h3 {
+    margin: 0 0 0.5em 0;
+}
+
+.assignment-selection > li p {
+    margin: 0.5em 0 0 0;
+}
+
+.assignment-selection > li:hover {
+    cursor: pointer;
+    background-color: #f8f8f8;
+}
+
+.assignment-selection.unclickable > li:hover {
+    cursor: default;
+}
+
+
+/* ===========================================
+
+Map area
+
+=========================================== */
+
+#maps {
+    grid-column: 2;
+}
+
+#my-map {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    box-shadow: none;
+}
+
+
+.loader {
+    width: 40px;
+    height: 40px;
+    background-color: #4af;;
+  
+    margin: 10px auto;
+    -webkit-animation: sk-rotateplane 1.2s infinite ease-in-out;
+    animation: sk-rotateplane 1.2s infinite ease-in-out;
+}
+
+@-webkit-keyframes sk-rotateplane {
+    0% { -webkit-transform: perspective(120px); }
+    50% { -webkit-transform: perspective(120px) rotateY(180deg); }
+    100% { -webkit-transform: perspective(120px) rotateY(180deg)  rotateX(180deg); }
+}
+
+@keyframes sk-rotateplane {
+    0% { 
+	transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+	-webkit-transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+    } 50% { 
+	transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
+	-webkit-transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
+    } 100% { 
+	transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+	-webkit-transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+    }
+}
+
+.loader.white {
+    background-color: #fff;
+}

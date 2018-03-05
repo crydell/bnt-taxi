@@ -353,6 +353,7 @@ html {
 
   .chat-box{
     position: fixed;
+    overflow: auto;
     bottom: 0;
     right: 0;
 }
@@ -360,8 +361,12 @@ html {
     transition: height .6s ease-out;
     width: 300px;
     height: 0px;
+    overflow: auto;
     background: rgb(255, 255, 255);
     z-index: 9999;
+}
+.box form{
+    vertical-align: bottom;
 }
   .open:hover>.box{
     height:400px;

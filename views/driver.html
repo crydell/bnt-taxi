@@ -22,52 +22,35 @@
 
     <section id="driver-info">
 
-      <div v-show="currentState=='assigning'">
-        <h1 align="center">
-          TAXI DRIVER # {{ taxi.taxiId }} {{ taxi.name }}
-        </h1>
+      <div id="status-box" v-show="currentState=='assigning' || currentState=='responding' || currentState=='responded' || currentState=='cancelled'">
+	<div v-show="currentState=='assigning'">
+          <h1 align="center">
+            TAXI DRIVER # {{ taxi.taxiId }} {{ taxi.name }}
+          </h1>
 
-        <div class="loader"></div>
-        <div><h3>Waiting for customer...</h3></div>
-      </div>
+          <div class="loader"></div>
+          <div><h3>Waiting for customer...</h3></div>
+	</div>
 
-      <div v-if="currentState=='responding'">
-	<h3>You've been assigned {{assignedTrip.order.name}} with a rating of {{assignedTrip.order.rating}}</h3>
-	<button v-on:click="respondToTripRequest(true)" class="accept-btn">Accept</button>
-  <button v-on:click="respondToTripRequest(false)" class="decline-btn">Decline</button>
-      </div>
+	<div v-if="currentState=='responding'">
+	  <h3>You've been assigned {{assignedTrip.order.name}} with a rating of {{assignedTrip.order.rating}}</h3>
+	  <button v-on:click="respondToTripRequest(true)" class="accept-btn">Accept</button>
+	  <button v-on:click="respondToTripRequest(false)" class="decline-btn">Decline</button>
+	</div>
 
-      <div v-if="currentState=='responded'">
-	<h3>Waiting for {{assignedTrip.order.name}} to accept...</h3>
+	<div v-if="currentState=='responded'">
+	  <h3>Waiting for {{assignedTrip.order.name}} to accept...</h3>
 	  
-        <div class="loader"></div>
-      </div>
+          <div class="loader"></div>
+	</div>
 
-      <div v-if="currentState=='cancelled'">
-	<h1 align="center">The order has been cancelled</h1>
-	<h3>Resuming search...</h3>
+	<div v-if="currentState=='cancelled'">
+	  <h1 align="center">The order has been cancelled</h1>
+	  <h3>Resuming search...</h3>
+	</div>
       </div>
 
     <div id="overlay">
-
-        <div v-show="currentState=='pickup' || currentState=='waiting'" class="chat-box">
-            <div class="open">Chat
-              <div class="box">
-          <br>
-          <div>
-            <p v-for="message in chatLog">
-              {{message.timeSent}} {{message.sender}}:
-              {{message.message}}</p>
-            
-            <form action="#" onsubmit="return false">
-              <input type="text" autocomplete="off" id="messageField">
-              <input type="submit" value="Send message" v-on:click="sendChatMessage"/>
-            </form>
-          </div>
-          <br>
-              </div>
-            </div>
-          </div>
       
         <button v-show="currentState=='inactive'||currentState=='assigning'" v-on:click="toggleAvailable" class="taxi-button1">
             <h3>Mark as {{ currentState == 'assigning' ? 'Unavailable' : 'Available' }}</h3>
@@ -85,6 +68,27 @@
             <h3>Complete Trip</h3>
         </button>
 
+	
+        <div v-show="currentState=='pickup' || currentState=='waiting'" class="chat-box">
+          <div class="open">Chat
+            <div class="box">
+              <br>
+              <div>
+		<p v-for="message in chatLog">
+		  {{message.timeSent}} {{message.sender}}:
+		  {{message.message}}</p>
+		
+		<form action="#" onsubmit="return false">
+		  <input type="text" autocomplete="off" id="messageField">
+		  <input type="submit" value="Send message" v-on:click="sendChatMessage"/>
+		</form>
+              </div>
+              <br>
+            </div>
+          </div>
+        </div>
+
+	
 	<div v-if="currentState=='rating'">
 	  <p>How was your passenger?</p>
     <form class="rating">
@@ -132,17 +136,6 @@
 
     </section>
     -->
-    <ul>
-      <div v-for="order in orders" v-if="order.taxiId == taxiId">
-        # {{ order.orderId}} From: {{ order.fromLatLong[0].toFixed(3) }}, {{ order.fromLatLong[1].toFixed(3) }} Destination: {{ order.destLatLong[0].toFixed(3) }}, {{ order.destLatLong[1].toFixed(3) }}
-        <ul>
-          <li v-for="item in order.orderItems">
-            {{ item }}
-          </li>
-        </ul>
-        <button v-on:click="acceptOrder(order)">ACCEPT</button><button v-on:click="finishOrder(order.orderId)">FINISH</button>
-      </div>
-    </ul>
     <!--<button v-on:click="markAtCustomer">Mark that you're at the customer</button>
     <button v-on:click="markCustomerReady">Mark that the customer is in and you have begun driving them</button>
     <button v-on:click="markTripComplete">Mark that the trip is complete</button>
